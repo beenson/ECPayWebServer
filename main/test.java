@@ -12,7 +12,13 @@ public class test {
         System.out.println("========================================");
         System.out.println("正在載入設定");
         Config.loadSetting();
-        User usr = new User(1);
+        User usr = new User();
+        usr.setAdmin(1);
+        usr.setEmail("email2");
+        usr.setName("name");
+        usr.setPassword("pass");
+        usr.setPhone("phone");
+        usr.saveToDB();
         System.out.println(usr.toString());
 
     }

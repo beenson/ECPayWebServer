@@ -74,16 +74,15 @@ public class User {
             if (this.id == -1) {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("INSERT INTO user (id, admin, name, email, password, phone) VALUES (?, ?, ?, ?, ?, ?)");
-                    ps.setInt(1, id);
-                    ps.setInt(2, admin);
-                    ps.setString(3, name);
-                    ps.setString(4, email);
-                    ps.setString(5, password);
-                    ps.setString(6, phone);
+                    ps = con.prepareStatement("INSERT INTO user (admin, name, email, password, phone) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps.setInt(1, admin);
+                    ps.setString(2, name);
+                    ps.setString(3, email);
+                    ps.setString(4, password);
+                    ps.setString(5, phone);
                     ps.execute();
-                    ps.close();
 
+                    // 取得自動遞增的id
                     try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             setId(generatedKeys.getInt(1));
@@ -91,6 +90,7 @@ public class User {
                             throw new SQLException("Creating user failed, no ID obtained.");
                         }
                     }
+                    ps.close();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

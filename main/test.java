@@ -1,10 +1,8 @@
 package main;
 
 import Config.Config;
-import Config.EcpayConfig;
 import Util.FileUtil;
-import handler.EcpayPayment;
-import handler.EcpayServer;
+import handler.ecpay.EcpayPayment;
 import model.User;
 
 

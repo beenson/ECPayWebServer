@@ -18,8 +18,8 @@ public class test {
         //testECPay();
         //testCreateUser();
         //EcpayServer.startServer();
-        testloadProduct();
-        testCreateProduct();
+        //testloadProduct();
+        //testCreateProduct();
 
     }
 

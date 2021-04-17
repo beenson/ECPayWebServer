@@ -1,7 +1,9 @@
 package main;
 
 import Config.Config;
+import Config.EcpayConfig;
 import Util.FileUtil;
+import handler.EcpayPayment;
 import model.User;
 
 
@@ -12,6 +14,16 @@ public class test {
         System.out.println("========================================");
         System.out.println("正在載入設定");
         Config.loadSetting();
+
+        testECPay();
+
+    }
+
+    public static void testECPay() {
+        EcpayPayment.genAioCheckOutTEST(1000);
+    }
+
+    public static void testCreateUser() {
         User usr = new User();
         usr.setAdmin(1);
         usr.setEmail("email2");
@@ -20,7 +32,6 @@ public class test {
         usr.setPhone("phone");
         usr.saveToDB();
         System.out.println(usr.toString());
-
     }
 
 

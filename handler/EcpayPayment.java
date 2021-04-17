@@ -104,7 +104,11 @@ public class EcpayPayment {
         obj.setMerchantTradeNo(Long.toString(System.currentTimeMillis()));
         obj.setMerchantTradeDate(DateUtil.getDatabaseFormatTime());
         obj.setTotalAmount(amount);
-        obj.setTradeDesc("贊助");
+        try{
+            obj.setTradeDesc("GameDonate安安".getBytes("UTF-8").toString());
+        } catch (Exception ex) {
+
+        }
         obj.setItemName("GAME DONATE");
         obj.setReturnURL(ReturnURL);
         obj.setNeedExtraPaidInfo("N");

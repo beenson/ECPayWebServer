@@ -120,7 +120,7 @@ public class EcpayPayment {
     public static void SavePaymentToDB(User usr, EcpayFunction.PaymentInfo pay) {
         if (pay != null) {
             System.out.println("[開出贊助] 單號: " + pay.getOrderNumber() + " 時間: " + DateUtil.getReadableTime() + " 帳號編號: " + usr.getId() + " 贊助: " + pay.getItemPrice() + "元");
-            try (Connection con = DBCon.getInstance().getCon()) {
+            try (Connection con = DBCon.getConnection()) {
                 PreparedStatement ps = con.prepareStatement("INSERT INTO ecpay_payment (order_number, merchant_name,item_name,item_price,SubPayment,payment_expiredate,payment_No,payment_status,accountId) VALUES (?,?,?,?,?,?,?,?,?)");
                 ps.setString(1, pay.getOrderNumber());
                 ps.setString(2, pay.getMerchantName());
@@ -152,7 +152,7 @@ public class EcpayPayment {
             return;
         }
 
-        try (Connection con = DBCon.getInstance().getCon()) {
+        try (Connection con = DBCon.getConnection()) {
             PreparedStatement ppss = con.prepareStatement("SELECT * FROM ecpay_payment WHERE order_number = " + OrderNumber);
             ResultSet rs = ppss.executeQuery();
             try {
@@ -262,7 +262,7 @@ public class EcpayPayment {
     public static List<EcpayFunction.PaymentInfo> getAllPaymentInfo(User usr) {
         LinkedList paylist = new LinkedList();
 
-        try (Connection con = DBCon.getInstance().getCon()) {
+        try (Connection con = DBCon.getConnection()) {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM ecpay_payment WHERE accountId = ? ORDER BY `ecpay_payment`.`payment_expiredate` DESC");
             ps.setInt(1, usr.getId());
             ResultSet rs = ps.executeQuery();
@@ -280,7 +280,7 @@ public class EcpayPayment {
     public static EcpayFunction.PaymentInfo getPaymentInfo(String paymentNo) {
         EcpayFunction.PaymentInfo payment = null;
         if (!paymentNo.isEmpty()) {
-            try (Connection con = DBCon.getInstance().getCon()) {
+            try (Connection con = DBCon.getConnection()) {
                 PreparedStatement ps = con.prepareStatement("SELECT * FROM ecpay_payment WHERE payment_No LIKE ?");
                 ps.setString(1, paymentNo);
                 ResultSet rs = ps.executeQuery();

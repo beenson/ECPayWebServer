@@ -3,6 +3,7 @@ package main;
 import Config.Config;
 import Util.FileUtil;
 import handler.ecpay.EcpayPayment;
+import model.Product;
 import model.User;
 
 
@@ -15,7 +16,10 @@ public class test {
         Config.loadSetting();
 
         //testECPay();
-        EcpayServer.startServer();
+        //testCreateUser();
+        //EcpayServer.startServer();
+        testloadProduct();
+        testCreateProduct();
 
     }
 
@@ -35,6 +39,19 @@ public class test {
         usr.setPhone("phone");
         usr.saveToDB();
         System.out.println(usr.toString());
+    }
+
+    public static void testloadProduct() {
+        Product.loadAllFromDB();
+        for(Product product : Product.getProducts().values()) {
+            System.out.println(product.toString());
+        }
+    }
+
+    public static void testCreateProduct() {
+        Product product = new Product(-1, "newProduct_"+(int)(Math.floor(Math.random() * 300)), (int)(Math.floor(Math.random() * 300) + 100), "description", (int)(Math.floor(Math.random() * 5) + 5), (int)(Math.floor(Math.random() * 10) + 10), true);
+        product.saveToDB();
+        System.out.println(product.toString());
     }
 
 

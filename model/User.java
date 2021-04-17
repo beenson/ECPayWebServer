@@ -41,7 +41,7 @@ public class User {
     }
 
     public void loadFromDB() {
-        try (Connection con = DBCon.getInstance().getCon()) {
+        try (Connection con = DBCon.getConnection()) {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE id = " + this.id);
             ResultSet rs = ps.executeQuery();
             try {
@@ -70,7 +70,7 @@ public class User {
     }
 
     public void saveToDB() {
-        try (Connection con = DBCon.getInstance().getCon()) {
+        try (Connection con = DBCon.getConnection()) {
             if (this.id == -1) {
                 try {
                     PreparedStatement ps;

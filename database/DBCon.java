@@ -14,17 +14,17 @@ public class DBCon {
 	@Getter
 	private static DBCon instance = new DBCon();
 
-	@Getter
-	private Connection con;
-	private String jdbcName;
-	private ResultSet rs;
-	private PreparedStatement pstmt;
+	private Connection con = null;
+	private String jdbcName = "com.mysql.cj.jdbc.Driver";
+	private ResultSet rs = null;
+	private PreparedStatement pstmt = null;
 	public DBCon() {
-		con = null;
-		jdbcName = "com.mysql.cj.jdbc.Driver";
-		pstmt = null;
-		rs = null;
 		this.connect();
+	}
+
+	public static Connection getConnection() {
+		DBCon dbc = new DBCon();
+		return dbc.con;
 	}
 	
 	/**
@@ -34,7 +34,7 @@ public class DBCon {
 		try {
 			Class.forName(jdbcName); //載入jdbc驅動程式
 			con = DriverManager.getConnection("jdbc:mysql://"+ DBConfig.getHost() +":"+DBConfig.getPort()+"/"+DBConfig.getDbName()+"?" + "user="+DBConfig.getUsername()+"&password="+DBConfig.getPassword()); //驅動程式管理器，取得mysql連線
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

@@ -3,8 +3,11 @@ package main;
 import Config.Config;
 import Util.FileUtil;
 import handler.ecpay.EcpayPayment;
+import model.Order;
 import model.Product;
 import model.User;
+
+import java.util.Date;
 
 
 public class test {
@@ -20,6 +23,8 @@ public class test {
         //EcpayServer.startServer();
         //testloadProduct();
         //testCreateProduct();
+        testloadOrder();
+        testCreateOrder();
 
     }
 
@@ -52,6 +57,19 @@ public class test {
         Product product = new Product(-1, "newProduct_"+(int)(Math.floor(Math.random() * 300)), (int)(Math.floor(Math.random() * 300) + 100), "description", (int)(Math.floor(Math.random() * 5) + 5), (int)(Math.floor(Math.random() * 10) + 10), true);
         product.saveToDB();
         System.out.println(product.toString());
+    }
+
+    public static void testloadOrder() {
+        Order.loadAllFromDB();
+        for(Order order : Order.getOrders().values()) {
+            System.out.println(order.toString());
+        }
+    }
+
+    public static void testCreateOrder() {
+        Order order = new Order(-1, 1, 1000, 0, new Date());
+        order.saveToDB();
+        System.out.println(order.toString());
     }
 
 

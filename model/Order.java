@@ -33,6 +33,10 @@ public class Order {
         this.createAt =  createAt;
     }
 
+    public String toString() {
+        return "Order::" + id + " userId=" + userId + " price=" + price + " status=" + status + " createAt=" + createAt.toLocaleString();
+    }
+
     public enum OrderStatus{
         createOrder(0),
         createPayment(1),
@@ -110,7 +114,7 @@ public class Order {
                     int userId = rs.getInt("userId");
                     int price = rs.getInt("price");
                     int status = rs.getInt("status");
-                    Date date = rs.getDate("id");
+                    Date date = rs.getDate("createAt");
                     Order order = new Order(id, userId, price, status, date);
                     orders.put(id, order);
                 }

@@ -15,11 +15,7 @@ public class test {
         Config.loadSetting();
 
         //testECPay();
-        Thread th = new Thread(() -> {
-            System.out.println("new Thread");
-            EcpayServer.startServer();
-        });
-        th.start();
+        EcpayServer.startServer();
 
     }
 

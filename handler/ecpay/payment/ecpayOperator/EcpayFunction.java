@@ -379,13 +379,13 @@ public class EcpayFunction {
             if (aio instanceof AioCheckOutATM) {
                 s = domElement.asText().replaceAll("\r|\n", "");
                 switch (i) {
-                    case 0:
+                    case 0:// 訂單編號
                         order_number = s;
                         break;
-                    case 1:
+                    case 1:// 商店名稱
                         merchant_name = s;
                         break;
-                    case 2:
+                    case 2:// 付款方式
                         SubPayment = s;
                     case 3:
                     case 4:
@@ -393,29 +393,29 @@ public class EcpayFunction {
                     case 7:
                     default:
                         break;
-                    case 5:
+                    case 5:// 商品名稱
                         item_name = s;
                         break;
-                    case 8:
+                    case 8:// 價格
                         item_price = Integer.valueOf(s.substring(4).replace(",", ""));
                         break;
-                    case 9:
+                    case 9:// 匯款銀行
                         bank_code = s.substring(0, 8);
                         payment_No = s.substring(8, 30);
                         break;
-                    case 10:
+                    case 10:// 繳費期限
                         payment_expiredate = s.substring(0, 19);
                 }
             } else if (aio instanceof AioCheckOutCVS) {
                 s = domElement.asText().replaceAll("\r|\n", "");
                 switch (i) {
-                    case 0:
+                    case 0:// 訂單編號
                         order_number = s;
                         break;
-                    case 1:
+                    case 1:// 商店名稱
                         merchant_name = s;
                         break;
-                    case 2:
+                    case 2:// 付款方式
                         SubPayment = s;
                     case 3:
                     case 4:
@@ -423,16 +423,16 @@ public class EcpayFunction {
                     case 7:
                     default:
                         break;
-                    case 5:
+                    case 5:// 商品名稱
                         item_name = s;
                         break;
-                    case 8:
+                    case 8:// 價格
                         item_price = Integer.valueOf(s.substring(4).replace(",", ""));
                         break;
-                    case 9:
+                    case 9:// 繳費代碼
                         payment_No = s.substring(41);
                         break;
-                    case 10:
+                    case 11:// 繳費期限
                         payment_expiredate = s.substring(0, 19);
                         break;
                 }

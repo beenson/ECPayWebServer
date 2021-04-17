@@ -107,7 +107,7 @@ public class EcpayPayment {
         try{
             obj.setTradeDesc("GameDonate安安".getBytes("UTF-8").toString());
         } catch (Exception ex) {
-
+            ex.printStackTrace();
         }
         obj.setItemName("GAME DONATE");
         obj.setReturnURL(ReturnURL);

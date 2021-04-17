@@ -42,7 +42,7 @@ public class User {
 
     public void loadFromDB() {
         try (Connection con = DBCon.getInstance().getCon()) {
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM user WHERE id = " + this.id);
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE id = " + this.id);
             ResultSet rs = ps.executeQuery();
             try {
                 if (rs.next()) {
@@ -74,7 +74,7 @@ public class User {
             if (this.id == -1) {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("INSERT INTO user (admin, name, email, password, phone) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps = con.prepareStatement("INSERT INTO users (admin, name, email, password, phone) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, admin);
                     ps.setString(2, name);
                     ps.setString(3, email);
@@ -97,7 +97,7 @@ public class User {
             } else {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("UPDATE user SET admin = ?, name = ?, email = ?, password = ?, phone = ?  WHERE id = ?");
+                    ps = con.prepareStatement("UPDATE users SET admin = ?, name = ?, email = ?, password = ?, phone = ?  WHERE id = ?");
                     ps.setInt(1, admin);
                     ps.setString(2, name);
                     ps.setString(3, email);

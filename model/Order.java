@@ -3,7 +3,6 @@ package model;
 import database.DBCon;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.xpath.operations.Or;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

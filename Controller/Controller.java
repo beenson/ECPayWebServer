@@ -1,4 +1,4 @@
-package main;
+package Controller;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -11,21 +11,20 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class RequestRouter implements HttpHandler {
+public abstract class Controller implements HttpHandler {
 
     @Override
     public void handle(HttpExchange Request){
         try{
             // 解析請求資料
-            String requestedURL = Request.getRequestHeaders().getFirst("Host") + Request.getRequestURI();
-            HashMap<String, Object> parameters = new HashMap<String, Object>();
+            String requestedURL = Request.getRequestURI() + "";
+            HashMap<String, String> parameters = new HashMap<String, String>();
             InputStreamReader isr = new InputStreamReader(Request.getRequestBody(), "utf-8");
             BufferedReader br = new BufferedReader(isr);
             String query = br.readLine();
             parseQuery(query, parameters);
 
-            String returnString = "URL:: " + requestedURL + "\n";
-            returnString += "query:: " + query;
+            String returnString = this.router(requestedURL.split("/"), parameters);
             String response = URLDecoder.decode(returnString, "UTF-8");//判別並執行請求後編碼
             Request.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
             Request.sendResponseHeaders(200, response.getBytes().length);
@@ -37,9 +36,9 @@ public class RequestRouter implements HttpHandler {
         }
     }
 
+    public abstract String router(String[] path, HashMap<String, String> params);
 
-
-    public static void parseQuery(String query, HashMap<String, Object> parameters) throws UnsupportedEncodingException {
+    public static void parseQuery(String query, HashMap<String, String> parameters) throws UnsupportedEncodingException {
         if (query != null) {
             String pairs[] = query.split("[&]");
             for (String pair : pairs) {
@@ -61,7 +60,7 @@ public class RequestRouter implements HttpHandler {
                         ArrayList<String> values = new ArrayList<>();
                         values.add((String) obj);
                         values.add(value);
-                        parameters.put(key, values);
+                        parameters.put(key, values.toString());
                     }
                 } else {
                     parameters.put(key, value);

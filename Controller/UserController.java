@@ -22,7 +22,9 @@ public class UserController extends Controller {
             case "register":
                 return "register";
         }
-        return path[0] + "/" + path[1] + "\n" + params.toString();
+        String res = "Unknown Request:: " + path[0] + "/" + path[1] + "\n" + params.toString();
+        System.out.println(res);
+        return res;
     }
 
 }

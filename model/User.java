@@ -115,4 +115,35 @@ public class User {
         }
     }
 
+
+    public static User getByEmail(String email) {
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM users WHERE email = ?");
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            try {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    int admin = rs.getInt("admin");
+                    String name = rs.getString("name");
+                    String mail = rs.getString("email");
+                    String password = rs.getString("password");
+                    String phone = rs.getString("phone");
+                    return new User(id, admin, name, mail, password, phone);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 }

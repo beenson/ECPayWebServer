@@ -18,6 +18,7 @@ public class test {
         System.out.println("正在載入設定");
         Config.loadSetting();
 
+        WebServer.start();
         testECPay();
         //testCreateUser();
         //EcpayServer.startServer();

@@ -18,13 +18,13 @@ public class test {
         System.out.println("正在載入設定");
         Config.loadSetting();
 
-        //testECPay();
+        testECPay();
         //testCreateUser();
         //EcpayServer.startServer();
-        //testloadProduct();
+        testloadProduct();
         //testCreateProduct();
         testloadOrder();
-        testCreateOrder();
+        //testCreateOrder();
 
     }
 

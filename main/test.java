@@ -3,6 +3,8 @@ package main;
 import Config.Config;
 import Util.FileUtil;
 import handler.ecpay.EcpayPayment;
+import handler.jwt.AuthVerify;
+import handler.jwt.JwtHandler;
 import model.Order;
 import model.Product;
 import model.User;
@@ -17,16 +19,28 @@ public class test {
         System.out.println("========================================");
         System.out.println("正在載入設定");
         Config.loadSetting();
+        JwtHandler.init();
 
-        WebServer.start();
-        testECPay();
+
+
+        //WebServer.start();
+        //testECPay();
         //testCreateUser();
         //EcpayServer.startServer();
-        testloadProduct();
+        //testloadProduct();
         //testCreateProduct();
-        testloadOrder();
+        //testloadOrder();
         //testCreateOrder();
+        testJWT();
 
+    }
+
+    public static void testJWT() {
+        User usr = new User(2);
+        String token = AuthVerify.generateToken(usr);
+        User usrtoken = AuthVerify.getAuth(token);
+        System.out.println(token);
+        System.out.println(usrtoken.toString());
     }
 
     public static void testECPay() {

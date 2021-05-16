@@ -24,7 +24,9 @@ public class User {
 
     public User(int id) {
         this.id = id;
-        this.loadFromDB();
+        if (id > 0) {
+            this.loadFromDB();
+        }
     }
 
     public User(int id, int admin, String name, String email, String password, String phone) {
@@ -52,6 +54,9 @@ public class User {
                     this.email = rs.getString("email");
                     this.password = rs.getString("password");
                     this.phone = rs.getString("phone");
+                } else {
+                    User self = this;
+                    self = null;
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();

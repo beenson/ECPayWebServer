@@ -24,9 +24,16 @@ public class JwtHandler {
 
 
     public static void main(String [] argv) {
-        genKeyMap();
+        genKey();
+        test();
+    }
 
-        HashMap<String, String> data = new HashMap<>();
+    public static void init() {
+        genKey();
+    }
+
+    public static void test() {
+        HashMap<String, Object> data = new HashMap<>();
         Date date = new Date("2021/05/20 17:00:05");
         data.put("key1", "value1");
         data.put("key2", "value2");
@@ -39,7 +46,7 @@ public class JwtHandler {
         System.out.println(jwt.getExpiresAt());
     }
 
-    public static void genKeyMap() {
+    public static void genKey() {
         try {
             // 實例化密鑰對生成器
             KeyPairGenerator key_pair_generator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA);
@@ -59,11 +66,11 @@ public class JwtHandler {
         }
     }
 
-    public static String create(HashMap<String, String> payload, Date expire) {
+    public static String create(HashMap<String, Object> payload, Date expire) {
         try {
             JWTCreator.Builder jwt = JWT.create();
-            for(Map.Entry<String, String> kv : payload.entrySet()) {
-                jwt.withClaim(kv.getKey(), kv.getValue());
+            for(Map.Entry<String, Object> kv : payload.entrySet()) {
+                jwt.withClaim(kv.getKey(), kv.getValue().toString());
             }
             jwt.withExpiresAt(expire);
             String token = jwt.sign(algorithm);
@@ -80,7 +87,7 @@ public class JwtHandler {
             DecodedJWT jwt = verifier.verify(token);
             return jwt;
         } catch (JWTVerificationException ex){
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
         return null;
     }

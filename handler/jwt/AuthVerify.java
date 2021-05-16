@@ -22,8 +22,6 @@ public class AuthVerify {
         Map<String, Claim> data = jwt.getClaims();
         int uid = Integer.parseInt(data.get("id").asString());
         User usr = new User(uid);
-        System.out.println("jwt=" + jwt.getExpiresAt());
-        System.out.println("current=" + new Date());
         return usr;
     }
 

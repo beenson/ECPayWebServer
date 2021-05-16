@@ -8,18 +8,11 @@ import java.util.HashMap;
 public class UserController extends Controller {
 
     public String router(String[] path, HashMap<String, String> params) {
-        String email, password, token;
-        User usr;
         switch (path[2]) {
             case "login":
                 return this.login(params).toJSONString();
             case "getUser":
-                token = params.get("token");
-                usr = AuthVerify.getAuth(token);
-                if (usr == null) {
-                    return "error";
-                }
-                return usr.toString();
+                return this.getUser(params).toJSONString();
             case "register":
                 return this.register(params).toJSONString();
         }
@@ -74,4 +67,19 @@ public class UserController extends Controller {
         return json;
     }
 
+    public JSONObject getUser(HashMap<String, String> params) {
+        JSONObject json = new JSONObject();
+        String token = params.get("token");
+        if (token == null) {
+            json.put("error", "error parameter.");
+            return json;
+        }
+        User usr = AuthVerify.getAuth(token);
+        if (usr == null) {
+            json.put("error", "error token.");
+            return json;
+        }
+        json.put("user", usr);
+        return json;
+    }
 }

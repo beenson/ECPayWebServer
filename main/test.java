@@ -23,7 +23,7 @@ public class test {
 
 
 
-        //WebServer.start();
+        WebServer.start();
         //testECPay();
         //testCreateUser();
         //EcpayServer.startServer();
@@ -31,7 +31,7 @@ public class test {
         //testCreateProduct();
         //testloadOrder();
         //testCreateOrder();
-        testJWT();
+        //testJWT();
 
     }
 

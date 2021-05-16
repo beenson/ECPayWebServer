@@ -26,7 +26,7 @@ public abstract class Controller implements HttpHandler {
 
             String returnString = this.router(requestedURL.split("/"), parameters);
             String response = URLDecoder.decode(returnString, "UTF-8");//判別並執行請求後編碼
-            Request.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            Request.getResponseHeaders().set("Content-Type", "text/json; charset=UTF-8");
             Request.sendResponseHeaders(200, response.getBytes().length);
             OutputStream os = Request.getResponseBody();
             os.write(response.getBytes());

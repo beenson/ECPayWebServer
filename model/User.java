@@ -2,6 +2,7 @@ package model;
 
 import Util.DateUtil;
 import Util.FileUtil;
+import com.alibaba.fastjson.annotation.JSONField;
 import database.DBCon;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +15,12 @@ import java.sql.SQLException;
 public class User {
 
     @Getter @Setter
-    private int id, admin;
+    private int id, admin = 0;
     @Getter @Setter
-    private String name, email, password, phone;
+    private String name, email, phone;
+    @JSONField(serialize = false)
+    @Getter @Setter
+    private String password;
 
     public User() {
         this.id = -1;

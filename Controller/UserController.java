@@ -15,6 +15,8 @@ public class UserController extends Controller {
                 return this.getUser(params).toJSONString();
             case "register":
                 return this.register(params).toJSONString();
+            case "refreshToken":
+                return this.refreshToken(params).toJSONString();
         }
         String res = "Unknown Request:: " + path[0] + "/" + path[1] + "\n" + params.toString();
         System.out.println(res);
@@ -79,6 +81,25 @@ public class UserController extends Controller {
             json.put("error", "error token.");
             return json;
         }
+        json.put("user", usr);
+        return json;
+    }
+
+    public JSONObject refreshToken(HashMap<String, String> params) {
+        JSONObject json = new JSONObject();
+        String token = params.get("token");
+        if (token == null) {
+            json.put("error", "error parameter.");
+            return json;
+        }
+        User usr = AuthVerify.getAuth(token);
+        if (usr == null) {
+            json.put("error", "error token.");
+            return json;
+        }
+        String newToken = AuthVerify.generateToken(usr);
+        json.put("oriToken", token);
+        json.put("newToken", newToken);
         json.put("user", usr);
         return json;
     }

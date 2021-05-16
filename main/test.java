@@ -19,12 +19,12 @@ public class test {
         Config.loadSetting();
 
         WebServer.start();
-        //testECPay();
+        testECPay();
         //testCreateUser();
         //EcpayServer.startServer();
-        //testloadProduct();
+        testloadProduct();
         //testCreateProduct();
-        //testloadOrder();
+        testloadOrder();
         //testCreateOrder();
 
     }

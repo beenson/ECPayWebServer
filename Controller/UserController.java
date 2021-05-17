@@ -20,9 +20,14 @@ public class UserController extends Controller {
                 return this.register(params).toJSONString();
             case "refreshToken":
                 return this.refreshToken(params).toJSONString();
+            case "editProfile":
+                return this.editProfile(params).toJSONString();
             //管理權限限定
             case "admin":
                 User admin = this.getAuthUser(params);
+                if (admin.getAdmin() <= 0) {
+                    break;
+                }
                 switch (path[3]) {
                     case "users":
                         return this.getUsers().toJSONString();
@@ -105,6 +110,47 @@ public class UserController extends Controller {
         }
         User usr = AuthVerify.getAuth(token);
         return usr;
+    }
+
+    public JSONObject editProfile(HashMap<String, String> params) {
+        JSONObject json = new JSONObject();
+        String token = params.get("token");
+        String newName = params.get("newName");
+        String oldPassword = params.get("oldPassword");
+        String newPassword = params.get("newPassword");
+        String newPhone = params.get("newPhone");
+        if (token == null) {
+            json.put("error", "error parameter.");
+            return json;
+        }
+        User usr = AuthVerify.getAuth(token);
+        if (usr == null) {
+            json.put("error", "error token.");
+            return json;
+        }
+        if (newName != null) {
+            usr.setName(newName);
+        }
+        if (newPassword != null) {
+            if (oldPassword != null) {
+                if (oldPassword.equals(usr.getPassword())) {
+                    usr.setPassword(newPassword);
+                } else {
+                    json.put("error", "wrong oldPassword.");
+                    return json;
+                }
+            } else {
+                json.put("error", "oldPassword not found.");
+                return json;
+            }
+        }
+        if (newPhone != null) {
+            usr.setPhone(newPhone);
+        }
+        usr.saveToDB();
+        json.put("status", "success");
+        json.put("user", usr);
+        return json;
     }
 
     public JSONObject refreshToken(HashMap<String, String> params) {

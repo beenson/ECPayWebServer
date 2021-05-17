@@ -22,6 +22,9 @@ public class AuthVerify {
         Map<String, Claim> data = jwt.getClaims();
         int uid = Integer.parseInt(data.get("id").asString());
         User usr = new User(uid);
+        if (usr.getId() == -1) {
+            return null;
+        }
         return usr;
     }
 

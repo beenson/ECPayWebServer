@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class User {
 
@@ -59,8 +60,7 @@ public class User {
                     this.password = rs.getString("password");
                     this.phone = rs.getString("phone");
                 } else {
-                    User self = this;
-                    self = null;
+                    this.id = -1;
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -154,5 +154,38 @@ public class User {
             ex.printStackTrace();
         }
         return null;
+    }
+
+
+    public static ArrayList<User> loadAllFromDB() {
+        ArrayList<User> users = new ArrayList<>();
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM users ");
+            ResultSet rs = ps.executeQuery();
+            try {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int admin = rs.getInt("admin");
+                    String name = rs.getString("name");
+                    String email = rs.getString("email");
+                    String password = rs.getString("password");
+                    String phone = rs.getString("phone");
+                    User usr = new User(id, admin, name, email, password, phone);
+                    users.add(usr);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return users;
     }
 }

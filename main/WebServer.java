@@ -15,7 +15,7 @@ public class WebServer {
             long startNow = System.currentTimeMillis();
             server = HttpServer.create(new InetSocketAddress(8080), 0);
             server.createContext("/user", new UserController());
-            server.createContext("/userX", new UserController());
+            //server.createContext("/userX", new UserController());
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();
             enable = true;

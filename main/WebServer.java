@@ -1,5 +1,6 @@
 package main;
 
+import Config.WebConfig;
 import Controller.UserController;
 import com.sun.net.httpserver.HttpServer;
 
@@ -13,13 +14,13 @@ public class WebServer {
     public static void start() {
         try {
             long startNow = System.currentTimeMillis();
-            server = HttpServer.create(new InetSocketAddress(8080), 0);
+            server = HttpServer.create(new InetSocketAddress(WebConfig.port), 0);
             server.createContext("/user", new UserController());
             //server.createContext("/userX", new UserController());
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();
             enable = true;
-            System.out.println("網頁伺服器初始化成功 占用Port:" + 8080+ "  花費時間:"+(System.currentTimeMillis()-startNow)+"毫秒");
+            System.out.println("網頁伺服器初始化成功 占用Port:" + WebConfig.port + "  花費時間:"+(System.currentTimeMillis()-startNow)+"毫秒");
         } catch (Exception ex) {
             System.out.println("網頁伺服器初始化失敗");
             ex.printStackTrace();

@@ -1,5 +1,6 @@
 package Controller;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -18,16 +19,18 @@ public abstract class Controller implements HttpHandler {
         try{
             // 解析請求資料
             String requestedURL = Request.getRequestURI() + "";
+            Headers hs = Request.getRequestHeaders();
             HashMap<String, String> parameters = new HashMap<String, String>();
             InputStreamReader isr = new InputStreamReader(Request.getRequestBody(), "utf-8");
             BufferedReader br = new BufferedReader(isr);
             String query = br.readLine();
             parseQuery(query, parameters);
 
-            String returnString = this.router(requestedURL.split("/"), parameters);
+            String returnString = this.router(hs, requestedURL.split("/"), parameters);
             String response = URLDecoder.decode(returnString, "UTF-8");//判別並執行請求後編碼
             Request.getResponseHeaders().set("Content-Type", "text/json; charset=UTF-8");
             Request.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            Request.getResponseHeaders().set("Access-Control-Allow-Headers", "*");
             Request.sendResponseHeaders(200, response.getBytes().length);
             OutputStream os = Request.getResponseBody();
             os.write(response.getBytes());
@@ -37,7 +40,7 @@ public abstract class Controller implements HttpHandler {
         }
     }
 
-    public abstract String router(String[] path, HashMap<String, String> params);
+    public abstract String router(Headers hs, String[] path, HashMap<String, String> params);
 
     public static void parseQuery(String query, HashMap<String, String> parameters) throws UnsupportedEncodingException {
         if (query != null) {

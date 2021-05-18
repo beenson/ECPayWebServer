@@ -1,5 +1,6 @@
 package Controller;
 
+import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
 import model.User;
 import com.alibaba.fastjson.*;
@@ -9,34 +10,45 @@ import java.util.HashMap;
 
 public class UserController extends Controller {
 
-    public String router(String[] path, HashMap<String, String> params) {
-        switch (path[2]) {
-            //普通權限
-            case "login":
-                return this.login(params).toJSONString();
-            case "getAuth":
-                return this.getAuth(params).toJSONString();
-            case "register":
-                return this.register(params).toJSONString();
-            case "refreshToken":
-                return this.refreshToken(params).toJSONString();
-            case "editProfile":
-                return this.editProfile(params).toJSONString();
-            //管理權限限定
-            case "admin":
-                User admin = this.getAuthUser(params);
-                if (admin.getAdmin() <= 0) {
-                    break;
-                }
-                switch (path[3]) {
-                    case "users":
-                        return this.getUsers().toJSONString();
-                    case "user"://user/{id}
-                        return this.getUser(path).toJSONString();
-                }
-                break;
+    public String router(Headers hs, String[] path, HashMap<String, String> params) {
+        String token = "";
+        User usr = null;
+        if (hs.containsKey("Authorization")) {
+            token = hs.getFirst("Authorization").replace("bearer ", "");
+            usr = AuthVerify.getAuth(token);
         }
-        String res = "Unknown Request:: " + path[0] + "/" + path[1] + "\n" + params.toString();
+        if (usr == null) {
+            switch (path[2]) {
+                //普通權限
+                case "login":
+                    return this.login(params).toJSONString();
+                case "register":
+                    return this.register(params).toJSONString();
+            }
+        } else {
+            switch (path[2]) {
+                //普通權限
+                case "getAuth":
+                    return this.getAuth(usr).toJSONString();
+                case "refreshToken":
+                    return this.refreshToken(usr).toJSONString();
+                case "editProfile":
+                    return this.editProfile(usr, params).toJSONString();
+                //管理權限限定
+                case "admin":
+                    if (usr.getAdmin() <= 0) {
+                        break;
+                    }
+                    switch (path[3]) {
+                        case "users":
+                            return this.getUsers().toJSONString();
+                        case "user"://user/{id}
+                            return this.getUser(path).toJSONString();
+                    }
+                    break;
+            }
+        }
+        String res = "Unknown Request:: " + path[1] + "/" + path[2] + "\n" + params.toString();
         System.out.println(res);
         return res;
     }
@@ -87,32 +99,13 @@ public class UserController extends Controller {
         return json;
     }
 
-    public JSONObject getAuth(HashMap<String, String> params) {
+    public JSONObject getAuth(User usr) {
         JSONObject json = new JSONObject();
-        String token = params.get("token");
-        if (token == null) {
-            json.put("error", "error parameter.");
-            return json;
-        }
-        User usr = AuthVerify.getAuth(token);
-        if (usr == null) {
-            json.put("error", "error token.");
-            return json;
-        }
         json.put("user", usr);
         return json;
     }
 
-    public User getAuthUser(HashMap<String, String> params) {
-        String token = params.get("token");
-        if (token == null) {
-            return null;
-        }
-        User usr = AuthVerify.getAuth(token);
-        return usr;
-    }
-
-    public JSONObject editProfile(HashMap<String, String> params) {
+    public JSONObject editProfile(User usr, HashMap<String, String> params) {
         JSONObject json = new JSONObject();
         String token = params.get("token");
         String newName = params.get("newName");
@@ -123,7 +116,6 @@ public class UserController extends Controller {
             json.put("error", "error parameter.");
             return json;
         }
-        User usr = AuthVerify.getAuth(token);
         if (usr == null) {
             json.put("error", "error token.");
             return json;
@@ -153,20 +145,13 @@ public class UserController extends Controller {
         return json;
     }
 
-    public JSONObject refreshToken(HashMap<String, String> params) {
+    public JSONObject refreshToken(User usr) {
         JSONObject json = new JSONObject();
-        String token = params.get("token");
-        if (token == null) {
-            json.put("error", "error parameter.");
-            return json;
-        }
-        User usr = AuthVerify.getAuth(token);
         if (usr == null) {
             json.put("error", "error token.");
             return json;
         }
         String newToken = AuthVerify.generateToken(usr);
-        json.put("oriToken", token);
         json.put("newToken", newToken);
         json.put("user", usr);
         return json;

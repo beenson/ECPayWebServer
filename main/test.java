@@ -21,8 +21,6 @@ public class test {
         Config.loadSetting();
         JwtHandler.init();
 
-
-
         WebServer.start();
         //testECPay();
         //testCreateUser();

@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class AuthVerify {
 
-    public static long expireTime = 3 * 60 * 60 * 1000;
+    public static long expireTime = 10 * 1000;
     //public static long expireTime = 0 * 1000;
 
     public static User getAuth(String token) {

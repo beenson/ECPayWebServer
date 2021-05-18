@@ -13,8 +13,8 @@ public class UserController extends Controller {
     public String router(Headers hs, String[] path, HashMap<String, String> params) {
         String token = "";
         User usr = null;
-        if (hs.containsKey("Authorization")) {
-            token = hs.getFirst("Authorization").replace("bearer ", "");
+        if (hs.getFirst("Authorization") != null) {
+            token = hs.getFirst("Authorization").replace("Bearer ", "");
             usr = AuthVerify.getAuth(token);
         }
         if (usr == null) {
@@ -48,9 +48,7 @@ public class UserController extends Controller {
                     break;
             }
         }
-        String res = "Unknown Request:: " + path[1] + "/" + path[2] + "\n" + params.toString();
-        System.out.println(res);
-        return res;
+        return "401";
     }
 
     public JSONObject login(HashMap<String, String> params) {
@@ -152,7 +150,7 @@ public class UserController extends Controller {
             return json;
         }
         String newToken = AuthVerify.generateToken(usr);
-        json.put("newToken", newToken);
+        json.put("token", newToken);
         json.put("user", usr);
         return json;
     }

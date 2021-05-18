@@ -27,11 +27,15 @@ public abstract class Controller implements HttpHandler {
             parseQuery(query, parameters);
 
             String returnString = this.router(hs, requestedURL.split("/"), parameters);
+            if (Request.getRequestMethod().equals("OPTIONS")) {
+                returnString = "";
+            }
             String response = URLDecoder.decode(returnString, "UTF-8");//判別並執行請求後編碼
             Request.getResponseHeaders().set("Content-Type", "text/json; charset=UTF-8");
             Request.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
             Request.getResponseHeaders().set("Access-Control-Allow-Headers", "*");
-            Request.sendResponseHeaders(200, response.getBytes().length);
+            Request.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
+            Request.sendResponseHeaders(returnString.equals("401") ? 401:200, response.getBytes().length);
             OutputStream os = Request.getResponseBody();
             os.write(response.getBytes());
             os.close();

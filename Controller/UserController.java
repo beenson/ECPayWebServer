@@ -105,15 +105,10 @@ public class UserController extends Controller {
 
     public JSONObject editProfile(User usr, HashMap<String, String> params) {
         JSONObject json = new JSONObject();
-        String token = params.get("token");
         String newName = params.get("newName");
         String oldPassword = params.get("oldPassword");
         String newPassword = params.get("newPassword");
         String newPhone = params.get("newPhone");
-        if (token == null) {
-            json.put("error", "error parameter.");
-            return json;
-        }
         if (usr == null) {
             json.put("error", "error token.");
             return json;

@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Product {
@@ -18,11 +19,11 @@ public class Product {
     @Getter @Setter
     private int id, price, sellAmount/*售出數量*/, storageAmount/*庫存數量*/;
     @Getter @Setter
-    private String name, desc;// 名稱 描述
+    private String name, desc, photo;// 名稱 描述 圖片網址
     @Getter @Setter
     private boolean onSell; // 是否正在販賣
 
-    public Product(int id, String name, int price, String desc, int sellAmount, int storageAmount, boolean onSell) {
+    public Product(int id, String name, int price, String desc, int sellAmount, int storageAmount, boolean onSell, String photo) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -30,10 +31,11 @@ public class Product {
         this.sellAmount = sellAmount;
         this.storageAmount = storageAmount;
         this.onSell = onSell;
+        this.photo = photo;
     }
 
     public String toString() {
-        return "Product::" + id + " name=" + name + " price=" + price + " desc=" + desc + " sellAmount=" + sellAmount + " storageAmount=" + storageAmount + " onSell=" + onSell;
+        return "Product::" + id + " name=" + name + " price=" + price + " desc=" + desc + " sellAmount=" + sellAmount + " storageAmount=" + storageAmount + " onSell=" + onSell + " photo=" + photo;
     }
 
     public void saveToDB() {
@@ -41,13 +43,14 @@ public class Product {
             if (this.id == -1) {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("INSERT INTO products (name, price, desciption, sellAmount, storageAmount, onSell) VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps = con.prepareStatement("INSERT INTO products (name, price, desciption, sellAmount, storageAmount, onSell, photo) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setString(1, name);
                     ps.setInt(2, price);
                     ps.setString(3, desc);
                     ps.setInt(4, sellAmount);
                     ps.setInt(5, storageAmount);
                     ps.setInt(6, onSell?1:0);
+                    ps.setString(7, photo);
                     ps.execute();
 
                     // 取得自動遞增的id
@@ -66,14 +69,15 @@ public class Product {
             } else {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("UPDATE products SET name = ?, price = ?, desciption = ?, sellAmount = ?, storageAmount = ?, onSell = ? WHERE id = ?");
+                    ps = con.prepareStatement("UPDATE products SET name = ?, price = ?, desciption = ?, sellAmount = ?, storageAmount = ?, onSell = ?, photo = ? WHERE id = ?");
                     ps.setString(1, name);
                     ps.setInt(2, price);
                     ps.setString(3, desc);
                     ps.setInt(4, sellAmount);
                     ps.setInt(5, storageAmount);
                     ps.setInt(6, onSell?1:0);
-                    ps.setInt(7, id);
+                    ps.setString(7, photo);
+                    ps.setInt(8, id);
                     ps.execute();
                     ps.close();
                 } catch (Exception ex) {
@@ -85,7 +89,65 @@ public class Product {
         }
     }
 
-    public static void loadAllFromDB() {
+    public void deleteFromDB() {
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps;
+            ps = con.prepareStatement("DELETE FROM products WHERE id = ?");
+            ps.setInt(1, id);
+            ps.execute();
+            ps.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static Product getById(String id) {
+        int search;
+        try{
+            search = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        if (search <= 0) {
+            return null;
+        }
+
+        return Product.getById(search);
+    }
+
+    public static Product getById(int id) {
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM products WHERE id = ?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            try {
+                if (rs.next()) {
+                    String name = rs.getString("name");
+                    int price = rs.getInt("price");
+                    String desc = rs.getString("desciption");
+                    int sellAmount = rs.getInt("sellAmount");
+                    int storageAmount = rs.getInt("storageAmount");
+                    boolean onSell = rs.getInt("onSell") == 1;
+                    String photo = rs.getString("photo");
+                    return new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    public static HashMap<Integer, Product> loadAllFromDB() {
         products.clear();
         try (Connection con = DBCon.getConnection()) {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM products");
@@ -99,7 +161,8 @@ public class Product {
                     int sellAmount = rs.getInt("sellAmount");
                     int storageAmount = rs.getInt("storageAmount");
                     boolean onSell = rs.getInt("onSell") == 1;
-                    Product prod = new Product(id, name, price, desc, sellAmount, storageAmount, onSell);
+                    String photo = rs.getString("photo");
+                    Product prod = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo);
                     products.put(id, prod);
                 }
             } catch (Exception ex) {
@@ -115,6 +178,7 @@ public class Product {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return products;
     }
 
     public static void saveAllToDB() {

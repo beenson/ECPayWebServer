@@ -1,6 +1,7 @@
 package main;
 
 import Config.WebConfig;
+import Controller.CategoryController;
 import Controller.ProductController;
 import Controller.UserController;
 import com.sun.net.httpserver.HttpServer;
@@ -18,6 +19,7 @@ public class WebServer {
             server = HttpServer.create(new InetSocketAddress(WebConfig.port), 0);
             server.createContext("/user", new UserController());
             server.createContext("/product", new ProductController());
+            server.createContext("/category", new CategoryController());
             //server.createContext("/userX", new UserController());
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();

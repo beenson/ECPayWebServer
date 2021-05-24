@@ -4,15 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
+import model.Category;
 import model.Product;
 import model.User;
-import org.apache.xpath.operations.Bool;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProductController extends Controller{
+public class CategoryController extends Controller{
 
     @Override
     public String router(Headers hs, String[] path, HashMap<String, String> params) {
@@ -53,21 +52,16 @@ public class ProductController extends Controller{
     }
 
     public String create(HashMap<String, String> params) {
-        if(params.get("name") == null || params.get("price") == null || params.get("desc") == null || params.get("sellAmount") == null || params.get("storageAmount") == null || params.get("onSell") == null)
+        if(params.get("name") == null || params.get("priority") == null)
             return "something have missed";
 
         try {
             int id = -1;
             String name = params.get("name");
-            int price = Integer.parseInt(params.get("price"));
-            String desc = params.get("desc");
-            int sellAmount = Integer.parseInt(params.get("sellAmount"));
-            int storageAmount = Integer.parseInt(params.get("storageAmount"));
-            boolean onSell = Boolean.valueOf(params.get("onSell"));
-            String photo = params.get("photo");
+            int priority = Integer.parseInt(params.get("priority"));
 
-            Product product = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo);
-            product.saveToDB();
+            Category category = new Category(id, name, priority);
+            category.saveToDB();
             return "success";
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -82,20 +76,20 @@ public class ProductController extends Controller{
             return json;
         }
 
-        Product product = Product.getById(path[3]);
-        if (product == null || product.getId() == -1) {
-            json.put("error", "Unknown product.");
+        Category category = Category.getById(path[3]);
+        if (category == null || category.getId() == -1) {
+            json.put("error", "Unknown category.");
             return json;
         }
-        json.put("product", product);
+        json.put("category", category);
         return json;
     }
 
     public JSONArray readAll() {
         JSONArray json = new JSONArray();
-        HashMap<Integer, Product> products = Product.loadAllFromDB();
-        for (Map.Entry<Integer, Product> product : products.entrySet()) {
-            json.add(product.getValue());
+        HashMap<Integer, Category> categories = Category.loadAllFromDB();
+        for (Map.Entry<Integer, Category> catogery : categories.entrySet()) {
+            json.add(catogery.getValue());
         }
         return json;
     }
@@ -105,20 +99,15 @@ public class ProductController extends Controller{
             return "error request path.";
         }
 
-        Product product = Product.getById(path[4]);
-        if(product == null || product.getId() == -1) {
-            return "product not found";
+        Category category = Category.getById(path[4]);
+        if(category == null || category.getId() == -1) {
+            return "category not found";
         }
         try {
-            product.setName(params.get("name"));
-            product.setPrice(Integer.parseInt(params.get("price")));
-            product.setDesc(params.get("desc"));
-            product.setSellAmount(Integer.parseInt(params.get("sellAmount")));
-            product.setStorageAmount(Integer.parseInt(params.get("storageAmount")));
-            product.setOnSell(Boolean.valueOf(params.get("onSell")));
-            product.setPhoto(params.get("photo"));
+            category.setName(params.get("name"));
+            category.setPriority(Integer.parseInt(params.get("priority")));
 
-            product.saveToDB();
+            category.saveToDB();
             return "success";
         }catch (Exception e) {
             e.printStackTrace();
@@ -131,11 +120,11 @@ public class ProductController extends Controller{
             return "error request path.";
         }
 
-        Product product = Product.getById(path[4]);
-        if(product == null || product.getId() == -1) {
-            return "product not found";
+        Category category = Category.getById(path[4]);
+        if(category == null || category.getId() == -1) {
+            return "category not found";
         }
-        product.deleteFromDB();
+        category.deleteFromDB();
         return "success";
     }
 }

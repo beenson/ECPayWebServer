@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
+import model.Category;
 import model.Product;
 import model.User;
 import org.apache.xpath.operations.Bool;
@@ -65,8 +66,9 @@ public class ProductController extends Controller{
             int storageAmount = Integer.parseInt(params.get("storageAmount"));
             boolean onSell = Boolean.valueOf(params.get("onSell"));
             String photo = params.get("photo");
+            int categoryId = Integer.parseInt(params.get("categoryId"));
 
-            Product product = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo);
+            Product product = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo, categoryId);
             product.saveToDB();
             return "success";
         } catch (Exception ex) {
@@ -117,6 +119,7 @@ public class ProductController extends Controller{
             product.setStorageAmount(Integer.parseInt(params.get("storageAmount")));
             product.setOnSell(Boolean.valueOf(params.get("onSell")));
             product.setPhoto(params.get("photo"));
+            product.setCategory(Category.getById(params.get("categoryId")));
 
             product.saveToDB();
             return "success";

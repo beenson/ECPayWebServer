@@ -67,7 +67,7 @@ public class test {
     }
 
     public static void testCreateProduct() {
-        Product product = new Product(-1, "newProduct_"+(int)(Math.floor(Math.random() * 300)), (int)(Math.floor(Math.random() * 300) + 100), "description", (int)(Math.floor(Math.random() * 5) + 5), (int)(Math.floor(Math.random() * 10) + 10), true, "https://picsum.photos/800");
+        Product product = new Product(-1, "newProduct_"+(int)(Math.floor(Math.random() * 300)), (int)(Math.floor(Math.random() * 300) + 100), "description", (int)(Math.floor(Math.random() * 5) + 5), (int)(Math.floor(Math.random() * 10) + 10), true, "https://picsum.photos/800", 2);
         product.saveToDB();
         System.out.println(product.toString());
     }

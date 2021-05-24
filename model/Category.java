@@ -14,9 +14,9 @@ import java.util.HashMap;
 public class Category {
 
     @Getter @Setter
-    public int id = 0, priority = 0;
+    private int id = 0, priority = 0;
     @Getter @Setter
-    public String name = "";
+    private String name = "";
 
     public Category(int id, String name, int priority) {
         this.id = id;

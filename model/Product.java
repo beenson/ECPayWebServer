@@ -22,8 +22,10 @@ public class Product {
     private String name, desc, photo;// 名稱 描述 圖片網址
     @Getter @Setter
     private boolean onSell; // 是否正在販賣
+    @Getter @Setter
+    private Category category;//分類
 
-    public Product(int id, String name, int price, String desc, int sellAmount, int storageAmount, boolean onSell, String photo) {
+    public Product(int id, String name, int price, String desc, int sellAmount, int storageAmount, boolean onSell, String photo, int categoryId) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -32,10 +34,11 @@ public class Product {
         this.storageAmount = storageAmount;
         this.onSell = onSell;
         this.photo = photo;
+        this.category = Category.getById(categoryId);
     }
 
     public String toString() {
-        return "Product::" + id + " name=" + name + " price=" + price + " desc=" + desc + " sellAmount=" + sellAmount + " storageAmount=" + storageAmount + " onSell=" + onSell + " photo=" + photo;
+        return "Product::" + id + " name=" + name + " price=" + price + " desc=" + desc + " sellAmount=" + sellAmount + " storageAmount=" + storageAmount + " onSell=" + onSell + " photo=" + photo + " category=" + category.toString();
     }
 
     public void saveToDB() {
@@ -43,7 +46,7 @@ public class Product {
             if (this.id == -1) {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("INSERT INTO products (name, price, desciption, sellAmount, storageAmount, onSell, photo) VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps = con.prepareStatement("INSERT INTO products (name, price, desciption, sellAmount, storageAmount, onSell, photo, categoryId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setString(1, name);
                     ps.setInt(2, price);
                     ps.setString(3, desc);
@@ -51,6 +54,7 @@ public class Product {
                     ps.setInt(5, storageAmount);
                     ps.setInt(6, onSell?1:0);
                     ps.setString(7, photo);
+                    ps.setInt(8, category.getId());
                     ps.execute();
 
                     // 取得自動遞增的id
@@ -69,7 +73,7 @@ public class Product {
             } else {
                 try {
                     PreparedStatement ps;
-                    ps = con.prepareStatement("UPDATE products SET name = ?, price = ?, desciption = ?, sellAmount = ?, storageAmount = ?, onSell = ?, photo = ? WHERE id = ?");
+                    ps = con.prepareStatement("UPDATE products SET name = ?, price = ?, desciption = ?, sellAmount = ?, storageAmount = ?, onSell = ?, photo = ?, categoryId = ? WHERE id = ?");
                     ps.setString(1, name);
                     ps.setInt(2, price);
                     ps.setString(3, desc);
@@ -77,7 +81,8 @@ public class Product {
                     ps.setInt(5, storageAmount);
                     ps.setInt(6, onSell?1:0);
                     ps.setString(7, photo);
-                    ps.setInt(8, id);
+                    ps.setInt(8, category.getId());
+                    ps.setInt(9, id);
                     ps.execute();
                     ps.close();
                 } catch (Exception ex) {
@@ -129,7 +134,8 @@ public class Product {
                     int storageAmount = rs.getInt("storageAmount");
                     boolean onSell = rs.getInt("onSell") == 1;
                     String photo = rs.getString("photo");
-                    return new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo);
+                    int categoryId = rs.getInt("categoryId");
+                    return new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo, categoryId);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -162,7 +168,8 @@ public class Product {
                     int storageAmount = rs.getInt("storageAmount");
                     boolean onSell = rs.getInt("onSell") == 1;
                     String photo = rs.getString("photo");
-                    Product prod = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo);
+                    int categoryId =  rs.getInt("categoryId");
+                    Product prod = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo, categoryId);
                     products.put(id, prod);
                 }
             } catch (Exception ex) {

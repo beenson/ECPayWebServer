@@ -11,7 +11,7 @@
  Target Server Version : 100408
  File Encoding         : 65001
 
- Date: 18/04/2021 01:45:46
+ Date: 25/05/2021 20:45:25
 */
 
 SET NAMES utf8mb4;
@@ -29,7 +29,10 @@ CREATE TABLE `products`  (
   `sellAmount` int(255) NULL DEFAULT NULL COMMENT '售出數量',
   `storageAmount` int(255) NULL DEFAULT NULL COMMENT '庫存數量',
   `onSell` int(255) NULL DEFAULT NULL COMMENT '是否上架',
-  PRIMARY KEY (`id`) USING BTREE
+  `categoryId` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `categoryId`(`categoryId`) USING BTREE,
+  CONSTRAINT `categoryId` FOREIGN KEY (`categoryId`) REFERENCES `category` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

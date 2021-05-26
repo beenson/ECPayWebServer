@@ -1,5 +1,6 @@
 package model;
 
+import Util.IntegerUtil;
 import database.DBCon;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Category {
@@ -43,7 +43,7 @@ public class Category {
                         if (generatedKeys.next()) {
                             setId(generatedKeys.getInt(1));
                         } else {
-                            throw new SQLException("Creating order failed, no ID obtained.");
+                            throw new SQLException("Creating category failed, no ID obtained.");
                         }
                     }
                     ps.close();
@@ -111,17 +111,10 @@ public class Category {
 
 
     public static Category getById(String id) {
-        int search;
-        try{
-            search = Integer.parseInt(id);
-        } catch (NumberFormatException e) {
+        if (!IntegerUtil.isInteger(id)) {
             return null;
         }
-        if (search <= 0) {
-            return null;
-        }
-
-        return Category.getById(search);
+        return Category.getById(Integer.parseInt(id));
     }
 
     public static Category getById(int id) {

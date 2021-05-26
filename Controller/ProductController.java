@@ -1,5 +1,7 @@
 package Controller;
 
+import Util.IntegerUtil;
+import Util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.net.httpserver.Headers;
@@ -17,46 +19,52 @@ public class ProductController extends Controller{
 
     @Override
     public String router(Headers hs, String[] path, HashMap<String, String> params) {
-        String token = "";
+        String token;
         User usr = null;
         if (hs.containsKey("Authorization")) {
             token = hs.getFirst("Authorization").replace("Bearer ", "");
             usr = AuthVerify.getAuth(token);
         }
         if(usr == null) {
-            return "login first";
+            return JsonUtil.unAuthorized().toJSONString();
         }
 
         switch (path[2]) {
             //普通權限
             case "read":
-                return this.read(path).toJSONString();
+                return this.getProduct(path).toJSONString();
             case "readAll":
-                return this.readAll().toJSONString();
+                return this.getProducts().toJSONString();
             //管理權限限定
             case "admin":
                 if (usr.getAdmin() <= 0) {
                     break;
                 }
-                switch (path[3]) {
-                    case "create":
-                        return this.create(params);
-                    case "update":
-                        return this.update(path, params);
-                    case "delete":
-                        return this.delete(path);
+                // /admin/{id}
+                if (IntegerUtil.isPositiveInteger(path[3])) {
+                    int id = Integer.parseInt(path[3]);
+                    switch (path[4]) {
+                        case "update": // /admin/{id}/update
+                            return this.update(id, params).toJSONString();
+                        case "delete": // /admin/{id}/delete
+                            return this.delete(id).toJSONString();
+                    }
+                } else {
+                    switch (path[3]) {
+                        case "create": // /admin/create
+                            return this.create(params).toJSONString();
+                    }
                 }
         }
-
         String res = "Unknown Request:: " + path[1] + "/" + path[2] + "\n" + params.toString();
         System.out.println(res);
         return res;
     }
 
-    public String create(HashMap<String, String> params) {
-        if(params.get("name") == null || params.get("price") == null || params.get("desc") == null || params.get("sellAmount") == null || params.get("storageAmount") == null || params.get("onSell") == null)
-            return "something have missed";
-
+    public JSONObject create(HashMap<String, String> params) {
+        if(params.get("name") == null || params.get("price") == null || params.get("desc") == null || params.get("sellAmount") == null || params.get("storageAmount") == null || params.get("onSell") == null) {
+            return JsonUtil.errParam();
+        }
         try {
             int id = -1;
             String name = params.get("name");
@@ -70,14 +78,17 @@ public class ProductController extends Controller{
 
             Product product = new Product(id, name, price, desc, sellAmount, storageAmount, onSell, photo, categoryId);
             product.saveToDB();
-            return "success";
+            JSONObject json = new JSONObject();
+            json.put("status", "success");
+            json.put("product", product);
+            return json;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return "fail";
+        return JsonUtil.unknownErr();
     }
 
-    public JSONObject read(String[] path) {
+    public JSONObject getProduct(String[] path) {
         JSONObject json = new JSONObject();
         if (path.length < 4) {
             json.put("error", "error request path.");
@@ -93,7 +104,7 @@ public class ProductController extends Controller{
         return json;
     }
 
-    public JSONArray readAll() {
+    public JSONArray getProducts() {
         JSONArray json = new JSONArray();
         HashMap<Integer, Product> products = Product.loadAllFromDB();
         for (Map.Entry<Integer, Product> product : products.entrySet()) {
@@ -102,14 +113,10 @@ public class ProductController extends Controller{
         return json;
     }
 
-    public String update(String[] path, HashMap<String, String> params) {
-        if (path.length < 5) {
-            return "error request path.";
-        }
-
-        Product product = Product.getById(path[4]);
+    public JSONObject update(int id, HashMap<String, String> params) {
+        Product product = Product.getById(id);
         if(product == null || product.getId() == -1) {
-            return "product not found";
+            return JsonUtil.unknown("Product");
         }
         try {
             product.setName(params.get("name"));
@@ -120,25 +127,25 @@ public class ProductController extends Controller{
             product.setOnSell(Boolean.valueOf(params.get("onSell")));
             product.setPhoto(params.get("photo"));
             product.setCategory(Category.getById(params.get("categoryId")));
-
             product.saveToDB();
-            return "success";
+            JSONObject json = new JSONObject();
+            json.put("status", "success");
+            json.put("product", product);
+            return json;
         }catch (Exception e) {
             e.printStackTrace();
         }
-        return "fail";
+        return JsonUtil.unknownErr();
     }
 
-    public String delete(String[] path) {
-        if (path.length < 5) {
-            return "error request path.";
-        }
-
-        Product product = Product.getById(path[4]);
+    public JSONObject delete(int id) {
+        Product product = Product.getById(id);
         if(product == null || product.getId() == -1) {
-            return "product not found";
+            return JsonUtil.unknown("Product");
         }
         product.deleteFromDB();
-        return "success";
+        JSONObject json = new JSONObject();
+        json.put("status", "success");
+        return json;
     }
 }

@@ -126,7 +126,7 @@ public class ProductController extends Controller{
             product.setStorageAmount(Integer.parseInt(params.get("storageAmount")));
             product.setOnSell(Boolean.valueOf(params.get("onSell")));
             product.setPhoto(params.get("photo"));
-            product.setCategory(Category.getById(params.get("categoryId")));
+            product.setCategoryId(Integer.parseInt(params.get("categoryId")));
             product.saveToDB();
             JSONObject json = new JSONObject();
             json.put("status", "success");

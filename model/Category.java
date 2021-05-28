@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Category {
@@ -26,6 +27,16 @@ public class Category {
 
     public String toString() {
         return "Category::" + id + " name=" + name + " prioity=" + priority;
+    }
+
+    public ArrayList<Product> getProducts() {
+        ArrayList<Product> products = new ArrayList<>();
+        for(Product product : Product.getProducts().values()) {
+            if (product.getCategoryId() == this.id) {
+                products.add(product);
+            }
+        }
+        return products;
     }
 
     public void saveToDB() {

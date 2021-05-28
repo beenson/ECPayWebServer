@@ -1,5 +1,6 @@
 package model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import database.DBCon;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class Product {
     @Getter @Setter
     private boolean onSell; // 是否正在販賣
     @Getter @Setter
-    private Category category;//分類
+    private int categoryId;//分類
 
     public Product(int id, String name, int price, String desc, int sellAmount, int storageAmount, boolean onSell, String photo, int categoryId) {
         this.id = id;
@@ -34,11 +35,16 @@ public class Product {
         this.storageAmount = storageAmount;
         this.onSell = onSell;
         this.photo = photo;
-        this.category = Category.getById(categoryId);
+        this.categoryId = categoryId;
     }
 
     public String toString() {
-        return "Product::" + id + " name=" + name + " price=" + price + " desc=" + desc + " sellAmount=" + sellAmount + " storageAmount=" + storageAmount + " onSell=" + onSell + " photo=" + photo + " category=" + category.toString();
+        return "Product::" + id + " name=" + name + " price=" + price + " desc=" + desc + " sellAmount=" + sellAmount + " storageAmount=" + storageAmount + " onSell=" + onSell + " photo=" + photo + " categoryId=" + categoryId;
+    }
+
+    @JSONField(serialize = false)
+    public Category getCategory() {
+        return Category.getById(this.categoryId);
     }
 
     public void saveToDB() {
@@ -54,7 +60,7 @@ public class Product {
                     ps.setInt(5, storageAmount);
                     ps.setInt(6, onSell?1:0);
                     ps.setString(7, photo);
-                    ps.setInt(8, category.getId());
+                    ps.setInt(8, categoryId);
                     ps.execute();
 
                     // 取得自動遞增的id
@@ -81,7 +87,7 @@ public class Product {
                     ps.setInt(5, storageAmount);
                     ps.setInt(6, onSell?1:0);
                     ps.setString(7, photo);
-                    ps.setInt(8, category.getId());
+                    ps.setInt(8, categoryId);
                     ps.setInt(9, id);
                     ps.execute();
                     ps.close();

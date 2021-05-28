@@ -2,8 +2,10 @@ package Controller;
 
 import Util.IntegerUtil;
 import Util.JsonUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
 import model.Category;
@@ -11,6 +13,7 @@ import model.Product;
 import model.User;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CategoryController extends Controller{
@@ -29,8 +32,6 @@ public class CategoryController extends Controller{
 
         switch (path[2]) {
             //普通權限
-            case "category":
-                return this.getCategory(path).toJSONString();
             case "categorys":
                 return this.getCategorys().toJSONString();
             //管理權限限定
@@ -52,6 +53,17 @@ public class CategoryController extends Controller{
                         case "create": // /admin/create
                             return this.create(params).toJSONString();
                     }
+                }
+            default:
+                if(IntegerUtil.isPositiveInteger(path[2])) {
+                    int id = Integer.parseInt(path[2]);
+                    if(path.length > 3) {
+                        switch (path[3]) {
+                            case "products":
+                                return JsonUtil.toString(this.getProducts(id));
+                        }
+                    }
+                    return this.getCategory(id).toJSONString();
                 }
         }
 
@@ -81,27 +93,34 @@ public class CategoryController extends Controller{
         return JsonUtil.unknownErr();
     }
 
-    public JSONObject getCategory(String[] path) {
+    public JSONObject getCategory(int categoryId) {
         JSONObject json = new JSONObject();
-        if (path.length < 4) {
-            json.put("error", "error request path.");
-            return json;
-        }
-
-        Category category = Category.getById(path[3]);
+        Category category = Category.getById(categoryId);
         if (category == null || category.getId() == -1) {
-            json.put("error", "Unknown category.");
-            return json;
+            return JsonUtil.unknown("Category");
         }
         json.put("category", category);
+        return json;
+    }
+
+    public JSONObject getProducts(int categoryId) {
+        Category category = Category.getById(categoryId);
+        if (category == null || category.getId() == -1) {
+            return JsonUtil.unknown("Category");
+        }
+        JSONObject json = new JSONObject();
+        json.put("category", category);
+        List prods = category.getProducts();
+        JSONArray products = new JSONArray(prods);
+        json.put("products", products);
         return json;
     }
 
     public JSONArray getCategorys() {
         JSONArray json = new JSONArray();
         HashMap<Integer, Category> categories = Category.loadAllFromDB();
-        for (Map.Entry<Integer, Category> catogery : categories.entrySet()) {
-            json.add(catogery.getValue());
+        for (Category catogery : categories.values()) {
+            json.add(catogery);
         }
         return json;
     }

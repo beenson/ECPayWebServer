@@ -1,8 +1,14 @@
 package Util;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class JsonUtil {
+
+    public static String toString(JSONObject json) {
+        return JSON.toJSONString(json, SerializerFeature.DisableCircularReferenceDetect);
+    }
 
     public static JSONObject errToken() {
         JSONObject json = new JSONObject();

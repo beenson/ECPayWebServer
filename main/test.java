@@ -5,6 +5,7 @@ import Util.FileUtil;
 import handler.ecpay.EcpayPayment;
 import handler.jwt.AuthVerify;
 import handler.jwt.JwtHandler;
+import model.Category;
 import model.Order;
 import model.Product;
 import model.User;
@@ -20,6 +21,9 @@ public class test {
         System.out.println("正在載入設定");
         Config.loadSetting();
         JwtHandler.init();
+
+        Product.loadAllFromDB();
+        Category.loadAllFromDB();
 
         WebServer.start();
         //testECPay();

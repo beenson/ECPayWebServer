@@ -11,7 +11,7 @@
  Target Server Version : 100408
  File Encoding         : 65001
 
- Date: 25/05/2021 20:45:25
+ Date: 28/05/2021 22:46:36
 */
 
 SET NAMES utf8mb4;
@@ -29,6 +29,7 @@ CREATE TABLE `products`  (
   `sellAmount` int(255) NULL DEFAULT NULL COMMENT '售出數量',
   `storageAmount` int(255) NULL DEFAULT NULL COMMENT '庫存數量',
   `onSell` int(255) NULL DEFAULT NULL COMMENT '是否上架',
+  `photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `categoryId` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `categoryId`(`categoryId`) USING BTREE,

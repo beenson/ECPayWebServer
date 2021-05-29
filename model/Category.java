@@ -1,6 +1,7 @@
 package model;
 
 import Util.IntegerUtil;
+import com.alibaba.fastjson.annotation.JSONField;
 import database.DBCon;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +30,7 @@ public class Category {
         return "Category::" + id + " name=" + name + " prioity=" + priority;
     }
 
+    @JSONField(serialize = false)
     public ArrayList<Product> getProducts() {
         ArrayList<Product> products = new ArrayList<>();
         for(Product product : Product.getProducts().values()) {

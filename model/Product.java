@@ -58,8 +58,8 @@ public class Product {
                     ps.setString(3, desc);
                     ps.setInt(4, sellAmount);
                     ps.setInt(5, storageAmount);
-                    ps.setInt(6, onSell?1:0);
                     ps.setString(7, photo);
+                    ps.setInt(6, onSell?1:0);
                     ps.setInt(8, categoryId);
                     ps.execute();
 

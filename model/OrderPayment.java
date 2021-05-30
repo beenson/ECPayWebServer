@@ -36,6 +36,9 @@ public class OrderPayment {
         this.id = id;
         this.loadFromDB();
     }
+    public OrderPayment() {
+        this.id = -1;
+    }
 
     public enum PaymentType {
         CVS(0),// 超商代碼
@@ -138,6 +141,39 @@ public class OrderPayment {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static OrderPayment loadByOrderId(int oid) {
+        OrderPayment payment = null;
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM orderpayments WHERE orderId = ?");
+            ps.setInt(1, oid);
+            ResultSet rs = ps.executeQuery();
+            try {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    int orderId = rs.getInt("orderId");
+                    String orderNumber = rs.getString("orderNumber");
+                    String bank = rs.getString("bank");
+                    String code = rs.getString("code");
+                    PaymentStatus status = PaymentStatus.getByValue(rs.getInt("status"));
+                    PaymentType type = PaymentType.getByValue(rs.getInt("type"));
+                    payment = new OrderPayment(id, orderId, orderNumber, bank, code, status, type);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return payment;
     }
 
     public void saveToDB() {

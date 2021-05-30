@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
-import model.Order;
-import model.OrderItem;
-import model.Product;
-import model.User;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,4 +130,42 @@ public class OrderController extends Controller{
         return json;
     }
 
+    public JSONObject generatePayment(User usr, int orderId, HashMap<String, String> params) {
+        JSONObject json = new JSONObject();
+        Order order = Order.loadById(orderId);
+        if (order == null) {
+            return JsonUtil.unknown("Order");
+        }
+        if (order.getUserId() != usr.getId()) {
+            return JsonUtil.unaccess();
+        }
+        if (order.getStatus() != Order.OrderStatus.createOrder) {
+            return JsonUtil.notAllowed();
+        }
+        OrderPayment.PaymentType type ;
+        String bank = "";
+        if (params.get("type") == null) {
+            return JsonUtil.errParam();
+        }
+        type = OrderPayment.PaymentType.getByValue(Integer.parseInt(params.get("type")));
+        if (type == null) {
+            return JsonUtil.errParam();
+        }
+        if (type == OrderPayment.PaymentType.ATM) {
+            if (params.get("bank") == null) {
+                return JsonUtil.errParam();
+            }
+            bank = params.get("bank");
+        }
+        OrderPayment payment = new OrderPayment();
+        payment.setBank(bank);
+        payment.setOrderId(order.getId());
+        payment.setType(type);
+        payment.setStatus(OrderPayment.PaymentStatus.created);
+        // TODO: ECPay generate Code
+        payment.saveToDB();
+        json.put("order", order);
+        json.put("payment", payment);
+        return json;
+    }
 }

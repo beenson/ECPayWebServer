@@ -16,6 +16,12 @@ public class JsonUtil {
         return json;
     }
 
+    public static JSONObject notAllowed() {
+        JSONObject json = new JSONObject();
+        json.put("error", "UnAllowed Request.");
+        return json;
+    }
+
     public static JSONObject errToken() {
         JSONObject json = new JSONObject();
         json.put("error", "wrong token.");

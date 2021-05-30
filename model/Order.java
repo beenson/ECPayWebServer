@@ -52,6 +52,11 @@ public class Order {
         return OrderItem.loadAllByOrderId(this.id).values();
     }
 
+    @JSONField(serialize = false)
+    public OrderPayment getPayment() {
+        return OrderPayment.loadByOrderId(this.id);
+    }
+
     public void calculatePrice() {
         int value = 0;
         Collection<OrderItem> items = this.getOrderItems();

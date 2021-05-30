@@ -10,6 +10,12 @@ public class JsonUtil {
         return JSON.toJSONString(json, SerializerFeature.DisableCircularReferenceDetect);
     }
 
+    public static JSONObject unaccess() {
+        JSONObject json = new JSONObject();
+        json.put("error", "Unaccass Request.");
+        return json;
+    }
+
     public static JSONObject errToken() {
         JSONObject json = new JSONObject();
         json.put("error", "wrong token.");

@@ -1,5 +1,6 @@
 package model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import database.DBCon;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,18 @@ public class OrderItem {
         this.orderId = orderId;
         this.productId = productId;
         this.amount = amount;
+    }
+
+    public OrderItem(int orderId, int productId, int amount) {
+        this.id = -1;
+        this.orderId = orderId;
+        this.productId = productId;
+        this.amount = amount;
+    }
+
+    @JSONField(serialize = false)
+    public Product getProduct() {
+        return Product.getById(this.productId);
     }
 
     public static void loadAllFromDB() {
@@ -128,5 +141,36 @@ public class OrderItem {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static HashMap<Integer, OrderItem> loadAllByOrderId(int oid) {
+        HashMap<Integer, OrderItem> list = new HashMap<Integer, OrderItem>();
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM orderitems WHERE orderId = ?");
+            ps.setInt(1, oid);
+            ResultSet rs = ps.executeQuery();
+            try {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int orderId = rs.getInt("orderId");
+                    int productId = rs.getInt("productId");
+                    int amount = rs.getInt("amount");
+                    OrderItem order = new OrderItem(id, orderId, productId, amount);
+                    list.put(id, order);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return list;
     }
 }

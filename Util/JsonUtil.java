@@ -12,7 +12,7 @@ public class JsonUtil {
 
     public static JSONObject unaccess() {
         JSONObject json = new JSONObject();
-        json.put("error", "Unaccass Request.");
+        json.put("error", "Unaccess Request.");
         return json;
     }
 

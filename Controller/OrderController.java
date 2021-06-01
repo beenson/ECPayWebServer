@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
 import model.*;
+import org.apache.xpath.operations.Or;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,9 @@ public class OrderController extends Controller{
         switch (path[2]) {
             //普通權限
             case "list":
-                return this.getOrders(usr).toJSONString();
+                return this.getOrders(usr.getId()).toJSONString();
+            case "create":
+                return this.createOrder(usr.getId(), params).toJSONString();
             //管理權限限定
             case "admin":
                 if (usr.getAdmin() <= 0) {
@@ -39,9 +42,23 @@ public class OrderController extends Controller{
                 if (IntegerUtil.isPositiveInteger(path[3])) {
                     int id = Integer.parseInt(path[3]);
                     if (path.length > 4) {
-                        // TODO: something?
+                        switch(path[4]) {
+                            case "create": // /order/admin/{uId}/create 為user創建訂單
+                                return this.createOrder(id, params).toJSONString();
+                            case "list": // /order/admin/{uId}/list 查看user訂單
+                                return this.getOrders(id).toJSONString();
+                            case "update": // /order/admin/{oId}/update 更新訂單
+                                return this.updateOrder(id, params).toJSONString();
+                            case "createPayment": // /order/admin/{oId}/createPayment
+                                return this.generatePayment(id, params).toJSONString();
+                        }
                     }
                     return JsonUtil.toString(this.getOrder(id)); // 使用此方法避免檢測是否為本人訂單
+                }else {
+                    switch (path[3]) {
+                        case "all": // /order/admin/all
+                            return this.getAllOrders().toJSONString();
+                    }
                 }
             default:
                 if (IntegerUtil.isPositiveInteger(path[2])) {
@@ -80,9 +97,18 @@ public class OrderController extends Controller{
         return json;
     }
 
-    public JSONArray getOrders(User usr) {
+    public JSONArray getOrders(int uId) {
         JSONArray json = new JSONArray();
-        HashMap<Integer, Order> orders = Order.loadAllByUserId(usr.getId());
+        HashMap<Integer, Order> orders = Order.loadAllByUserId(uId);
+        for (Order order : orders.values()) {
+            json.add(order);
+        }
+        return json;
+    }
+
+    public JSONArray getAllOrders() {
+        JSONArray json = new JSONArray();
+        HashMap<Integer, Order> orders = Order.loadAllFromDB();
         for (Order order : orders.values()) {
             json.add(order);
         }
@@ -94,7 +120,7 @@ public class OrderController extends Controller{
      *      {productId: int, amount: int},...
      * ]
      */
-    public JSONObject createOrder(User usr, HashMap<String, String> params) {
+    public JSONObject createOrder(int uId, HashMap<String, String> params) {
         JSONArray data;
         if (params.get("data") == null) {
             return JsonUtil.errParam();
@@ -103,8 +129,39 @@ public class OrderController extends Controller{
         if (data == null) {
             return JsonUtil.errParam();
         }
-        Order order = new Order(usr.getId());
+        Order order = new Order(uId);
         order.saveToDB();
+        ArrayList<OrderItem> items = addOrderItems(order.getId(), data);
+        order.calculatePrice();
+        JSONObject json = new JSONObject();
+        json.put("Order", order);
+        json.put("OrderItems", items);
+        return json;
+    }
+
+    public JSONObject updateOrder(int uId, HashMap<String, String> params) {
+        JSONArray data;
+        if (params.get("data") == null) {
+            return JsonUtil.errParam();
+        }
+        data = JSONObject.parseArray(params.get("data"));
+        if (data == null) {
+            return JsonUtil.errParam();
+        }
+        Order order = Order.loadById(uId);
+        if(order == null) {
+            return JsonUtil.errId();
+        }
+        order.getOrderItems().forEach(obj -> obj.deleteFromDB());
+        ArrayList<OrderItem> items = addOrderItems(order.getId(), data);
+        order.calculatePrice();
+        JSONObject json = new JSONObject();
+        json.put("Order", order);
+        json.put("OrderItems", items);
+        return json;
+    }
+
+    private ArrayList<OrderItem> addOrderItems(int oId, JSONArray data) {
         ArrayList<OrderItem> items = new ArrayList<>();
         data.forEach( obj -> {
             JSONObject json = (JSONObject) obj;
@@ -119,25 +176,18 @@ public class OrderController extends Controller{
             if (amount <= 0) {
                 return;
             }
-            OrderItem item = new OrderItem(order.getId(), pid, amount);
+            OrderItem item = new OrderItem(oId, pid, amount);
             item.saveToDB();
             items.add(item);
         });
-        order.calculatePrice();
-        JSONObject json = new JSONObject();
-        json.put("Order", order);
-        json.put("OrderItems", items);
-        return json;
+        return items;
     }
 
-    public JSONObject generatePayment(User usr, int orderId, HashMap<String, String> params) {
+    public JSONObject generatePayment(int orderId, HashMap<String, String> params) {
         JSONObject json = new JSONObject();
         Order order = Order.loadById(orderId);
         if (order == null) {
             return JsonUtil.unknown("Order");
-        }
-        if (order.getUserId() != usr.getId()) {
-            return JsonUtil.unaccess();
         }
         if (order.getStatus() != Order.OrderStatus.createOrder) {
             return JsonUtil.notAllowed();
@@ -157,6 +207,8 @@ public class OrderController extends Controller{
             }
             bank = params.get("bank");
         }
+        order.setStatus(Order.OrderStatus.createPayment);
+        order.saveToDB();
         OrderPayment payment = new OrderPayment();
         payment.setBank(bank);
         payment.setOrderId(order.getId());

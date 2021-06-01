@@ -143,6 +143,18 @@ public class OrderItem {
         }
     }
 
+    public void deleteFromDB() {
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps;
+            ps = con.prepareStatement("DELETE FROM orderitems WHERE id = ?");
+            ps.setInt(1, id);
+            ps.execute();
+            ps.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public static HashMap<Integer, OrderItem> loadAllByOrderId(int oid) {
         HashMap<Integer, OrderItem> list = new HashMap<Integer, OrderItem>();
         try (Connection con = DBCon.getConnection()) {

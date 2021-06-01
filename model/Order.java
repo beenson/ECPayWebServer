@@ -44,7 +44,7 @@ public class Order {
     }
 
     public String toString() {
-        return "Order::" + id + " userId=" + userId + " price=" + price + " status=" + status + " createAt=" + createAt.toLocaleString();
+        return "Order::" + id + " userId=" + userId + " price=" + price + " status=" + status + " createAt=" + createAt;
     }
 
     @JSONField(serialize = false)
@@ -137,7 +137,7 @@ public class Order {
         }
     }
 
-    public static void loadAllFromDB() {
+    public static HashMap<Integer, Order> loadAllFromDB() {
         orders.clear();
         try (Connection con = DBCon.getConnection()) {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM orders");
@@ -165,6 +165,7 @@ public class Order {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return orders;
     }
 
     public static HashMap<Integer, Order> loadAllByUserId(int uid) {

@@ -44,7 +44,15 @@ public class UserController extends Controller {
                         case "users":
                             return this.getUsers().toJSONString();
                         case "user"://user/{id}
-                            return this.getUser(path).toJSONString();
+                            int id = Integer.parseInt(path[4]);
+                            if (path.length >= 6) {
+                                switch (path[5]) {
+                                    case "edit":
+                                        return this.editUser(id, params).toJSONString();
+                                }
+                            } else {
+                                return this.getUser(id).toJSONString();
+                            }
                     }
                     break;
             }
@@ -131,6 +139,39 @@ public class UserController extends Controller {
         return json;
     }
 
+    public JSONObject editUser(int id, HashMap<String, String> params) {
+        User usr = new User(id);
+        if (usr == null || usr.getId() == -1) {
+            return JsonUtil.unknown("User");
+        }
+        String newName = params.get("newName");
+        String newPassword = params.get("newPassword");
+        String newPhone = params.get("newPhone");
+        String newEmail = params.get("newEmail");
+        int newAdmin = Integer.parseInt(params.get("newAdmin"));
+        if (usr == null) {
+            return JsonUtil.errToken();
+        }
+        if (newName != null) {
+            usr.setName(newName);
+        }
+        if (newPassword != null) {
+            usr.setPassword(newPassword);
+        }
+        if (newPhone != null) {
+            usr.setPhone(newPhone);
+        }
+        if (newEmail != null) {
+            usr.setEmail(newEmail);
+        }
+        usr.setAdmin(newAdmin);
+        usr.saveToDB();
+        JSONObject json = new JSONObject();
+        json.put("status", "success");
+        json.put("user", usr);
+        return json;
+    }
+
     public JSONObject refreshToken(User usr) {
         if (usr == null) {
             return JsonUtil.errToken();
@@ -151,11 +192,7 @@ public class UserController extends Controller {
         return json;
     }
 
-    public JSONObject getUser(String path[]) {
-        if (path.length < 5) {
-            return JsonUtil.errPath();
-        }
-        int id = Integer.parseInt(path[4]);
+    public JSONObject getUser(int id) {
         if (id <= 0) {
             return JsonUtil.errId();
         }

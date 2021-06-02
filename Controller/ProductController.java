@@ -31,9 +31,7 @@ public class ProductController extends Controller{
 
         switch (path[2]) {
             //普通權限
-            case "read":
-                return this.getProduct(path).toJSONString();
-            case "readAll":
+            case "list":// /list
                 return this.getProducts().toJSONString();
             //管理權限限定
             case "admin":
@@ -54,6 +52,11 @@ public class ProductController extends Controller{
                         case "create": // /admin/create
                             return this.create(params).toJSONString();
                     }
+                }
+            default:
+                if (IntegerUtil.isPositiveInteger(path[2])) {// /product/{id}
+                    int id = Integer.parseInt(path[2]);
+                    return this.getProduct(id).toJSONString();
                 }
         }
         String res = "Unknown Request:: " + path[1] + "/" + path[2] + "\n" + params.toString();
@@ -88,18 +91,12 @@ public class ProductController extends Controller{
         return JsonUtil.unknownErr();
     }
 
-    public JSONObject getProduct(String[] path) {
-        JSONObject json = new JSONObject();
-        if (path.length < 4) {
-            json.put("error", "error request path.");
-            return json;
-        }
-
-        Product product = Product.getById(path[3]);
+    public JSONObject getProduct(int id) {
+        Product product = Product.getById(id);
         if (product == null || product.getId() == -1) {
-            json.put("error", "Unknown product.");
-            return json;
+            return JsonUtil.unknown("Product");
         }
+        JSONObject json = new JSONObject();
         json.put("product", product);
         return json;
     }

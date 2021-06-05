@@ -12,6 +12,7 @@ import model.Category;
 import model.Product;
 import model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,8 +111,18 @@ public class CategoryController extends Controller{
         }
         JSONObject json = new JSONObject();
         json.put("category", category);
-        List prods = category.getProducts();
-        JSONArray products = new JSONArray(prods);
+        List<Product> prods = category.getProducts();
+        ArrayList<Product> toRemove = new ArrayList<Product>();
+        for(Product product : prods) {
+            if (!product.isOnSell()) {
+                toRemove.add(product);
+            }
+        }
+        for(Product product : toRemove) {
+            prods.remove(product);
+        }
+        List list = prods;
+        JSONArray products = new JSONArray(list);
         json.put("products", products);
         return json;
     }

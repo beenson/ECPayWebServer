@@ -375,7 +375,7 @@ public class EcpayFunction {
         for (int i = 0; i < elementsByTagName.getLength(); ++i) {
             DomElement domElement = (DomElement) elementsByTagName.get(i);
             String s = "";
-            System.out.println(i + " : " + domElement.asText().replaceAll("\r|\n", ""));
+            // System.out.println(i + " : " + domElement.asText().replaceAll("\r|\n", ""));
             if (aio instanceof AioCheckOutATM) {
                 s = domElement.asText().replaceAll("\r|\n", "");
                 switch (i) {

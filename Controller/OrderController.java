@@ -5,6 +5,8 @@ import Util.JsonUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.net.httpserver.Headers;
+import handler.ecpay.EcpayPayment;
+import handler.ecpay.payment.ecpayOperator.EcpayFunction;
 import handler.jwt.AuthVerify;
 import model.*;
 import org.apache.xpath.operations.Or;
@@ -205,7 +207,14 @@ public class OrderController extends Controller{
         payment.setOrderId(order.getId());
         payment.setType(type);
         payment.setStatus(OrderPayment.PaymentStatus.created);
-        // TODO: ECPay generate Code
+        EcpayFunction.PaymentInfo info;
+        if (type.equals(OrderPayment.PaymentType.ATM)) {
+            info = EcpayPayment.genAioCheckOutTEST(order.getPrice());
+        } else {
+            info = EcpayPayment.genAioCheckOutTEST(order.getPrice());
+            payment.setBank(info.getBankCode());
+        }
+        payment.setCode(info.getPaymentNo());
         payment.saveToDB();
         return payment;
     }

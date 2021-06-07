@@ -49,8 +49,6 @@ public class OrderController extends Controller{
                                 return this.getOrders(id).toJSONString();
                             case "update": // /order/admin/{oId}/update 更新訂單
                                 return this.updateOrder(id, params).toJSONString();
-                            case "createPayment": // /order/admin/{oId}/createPayment
-                                return this.generatePayment(id, params).toJSONString();
                         }
                     }
                     return JsonUtil.toString(this.getOrder(id)); // 使用此方法避免檢測是否為本人訂單
@@ -118,12 +116,26 @@ public class OrderController extends Controller{
     /** Request:: JSON String
      * data:[
      *      {productId: int, amount: int},...
-     * ]
+     * ],
+     * type: {ATM | CVS},
+     * bank: {String}
      */
     public JSONObject createOrder(int uId, HashMap<String, String> params) {
         JSONArray data;
+        String bank = "";
+        OrderPayment.PaymentType type;
         if (params.get("data") == null) {
             return JsonUtil.errParam();
+        }
+        if (params.get("type") == null) {
+            return JsonUtil.errParam();
+        }
+        type = OrderPayment.PaymentType.getByValue(Integer.parseInt(params.get("type")));
+        if (type == OrderPayment.PaymentType.ATM) {
+            if (params.get("bank") == null) {
+                return JsonUtil.errParam();
+            }
+            bank = params.get("bank");
         }
         data = JSONObject.parseArray(params.get("data"));
         if (data == null) {
@@ -133,9 +145,11 @@ public class OrderController extends Controller{
         order.saveToDB();
         ArrayList<OrderItem> items = addOrderItems(order.getId(), data);
         order.calculatePrice();
+        OrderPayment payment = this.generatePayment(order, type, bank);
         JSONObject json = new JSONObject();
         json.put("Order", order);
         json.put("OrderItems", items);
+        json.put("OrderPayment", payment);
         return json;
     }
 
@@ -183,30 +197,7 @@ public class OrderController extends Controller{
         return items;
     }
 
-    public JSONObject generatePayment(int orderId, HashMap<String, String> params) {
-        JSONObject json = new JSONObject();
-        Order order = Order.loadById(orderId);
-        if (order == null) {
-            return JsonUtil.unknown("Order");
-        }
-        if (order.getStatus() != Order.OrderStatus.createOrder) {
-            return JsonUtil.notAllowed();
-        }
-        OrderPayment.PaymentType type ;
-        String bank = "";
-        if (params.get("type") == null) {
-            return JsonUtil.errParam();
-        }
-        type = OrderPayment.PaymentType.getByValue(Integer.parseInt(params.get("type")));
-        if (type == null) {
-            return JsonUtil.errParam();
-        }
-        if (type == OrderPayment.PaymentType.ATM) {
-            if (params.get("bank") == null) {
-                return JsonUtil.errParam();
-            }
-            bank = params.get("bank");
-        }
+    public OrderPayment generatePayment(Order order, OrderPayment.PaymentType type, String bank) {
         order.setStatus(Order.OrderStatus.createPayment);
         order.saveToDB();
         OrderPayment payment = new OrderPayment();
@@ -216,8 +207,6 @@ public class OrderController extends Controller{
         payment.setStatus(OrderPayment.PaymentStatus.created);
         // TODO: ECPay generate Code
         payment.saveToDB();
-        json.put("order", order);
-        json.put("payment", payment);
-        return json;
+        return payment;
     }
 }

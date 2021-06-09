@@ -105,7 +105,7 @@ public class EcpayPayment {
         obj.setMerchantTradeDate(DateUtil.getDatabaseFormatTime());
         obj.setTotalAmount(amount);
         try{
-            obj.setTradeDesc("GameDonate安安".getBytes("UTF-8").toString());
+            obj.setTradeDesc("安安".getBytes("UTF-8").toString());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -117,145 +117,40 @@ public class EcpayPayment {
         return pay;
     }
 
-    public static void SavePaymentToDB(User usr, EcpayFunction.PaymentInfo pay) {
-        if (pay != null) {
-            System.out.println("[開出贊助] 單號: " + pay.getOrderNumber() + " 時間: " + DateUtil.getReadableTime() + " 帳號編號: " + usr.getId() + " 贊助: " + pay.getItemPrice() + "元");
-            try (Connection con = DBCon.getConnection()) {
-                PreparedStatement ps = con.prepareStatement("INSERT INTO ecpay_payment (order_number, merchant_name,item_name,item_price,SubPayment,payment_expiredate,payment_No,payment_status,accountId) VALUES (?,?,?,?,?,?,?,?,?)");
-                ps.setString(1, pay.getOrderNumber());
-                ps.setString(2, pay.getMerchantName());
-                ps.setString(3, pay.getItemName());
-                ps.setInt(4, pay.getItemPrice());
-                ps.setString(5, pay.getSubPayment());
-                ps.setString(6, pay.getPaymentExpiryDate());
-                ps.setString(7, pay.getBankCode().isEmpty() ? pay.getPaymentNo() : pay.getBankCode() + " - " + pay.getPaymentNo());
-                ps.setString(8, pay.getPaymentStatus());
-                ps.setInt(9, usr.getId());
-                ps.executeUpdate();
-                ps.close();
-            } catch (Exception ex) {
-                FileUtil.log("EcpayPayment.txt", "SavePaymentToDB" + ex +"OrderNumber:" + pay.getOrderNumber() + " itemPrice:" + pay.getItemPrice() + " itemName:" + pay.getItemName() + " MerchantName:" + pay.getMerchantName() + " 帳號編號:" + usr.getId());
-            }
-        }
-
-    }
-
-    public static void UpdatePaymentDB(String OrderNumber, String customField1, String TradeAmt, String PaymentType, String RtnMsg) {
-        int realTradeAmount, accountId = -1;
-        try {
-            realTradeAmount = Integer.parseInt(TradeAmt);
-            accountId = Integer.parseInt(customField1);
-        } catch (Exception ex) {
-            realTradeAmount = 0;
-            accountId = -1;
-            FileUtil.log("EcpayPayment.txt", "UpdatePaymentDB\n"+ ex.getMessage() + "OrderNumber:" + OrderNumber + " customField1:" + customField1 + " TradeAmt:" + TradeAmt + " customField1:" + customField1);
-            return;
-        }
-
-        try (Connection con = DBCon.getConnection()) {
-            PreparedStatement ppss = con.prepareStatement("SELECT * FROM ecpay_payment WHERE order_number = " + OrderNumber);
-            ResultSet rs = ppss.executeQuery();
-            try {
-                String s = "";
-                if (rs.next()) {
-                    s = rs.getString("payment_status");
-                }
-                if (s.equals("尚未繳款")) {
-                    PreparedStatement ps = con.prepareStatement("UPDATE ecpay_payment SET payment_status = ? WHERE order_number = ?");
-                    ps.setString(1, RtnMsg + "(" + DateUtil.getReadableTime() + ")");
-                    ps.setString(2, OrderNumber);
-                    ps.execute();
-                    ps.close();
-                    ps = con.prepareStatement("INSERT INTO donate (accountId, amount, paymentMethod, payTime, payDate) VALUES (?, ?, ?, ?, ?)");
-                    ps.setInt(1, accountId);
-                    ps.setInt(2, realTradeAmount);
-                    ps.setString(3, PaymentType);
-                    ps.setLong(4, System.currentTimeMillis());
-                    ps.setString(5, DateUtil.getReadableTime());
-                    ps.execute();
-                    ps.close();
-
-                    ps = con.prepareStatement("UPDATE accounts SET `total_donate` = `total_donate` + ?, `today_donate` = `today_donate` + ?, `month_total_donate` = `month_total_donate` + ? WHERE accountId = ?");
-                    ps.setInt(1, realTradeAmount);
-                    ps.setInt(2, realTradeAmount);
-                    ps.setInt(3, realTradeAmount);
-                    ps.setInt(4, accountId);
-                    ps.execute();
-                    ps.close();
-
-                    ps = con.prepareStatement("SELECT * FROM donate_point WHERE accountId = ?");
-                    ps.setInt(1, accountId);
-                    ResultSet rss = ps.executeQuery();
-
-                    try {
-                        PreparedStatement pps;
-                        if (!rss.next()) {
-                            pps = con.prepareStatement("INSERT INTO donate_point (accountId, `point`, LastAttempt) VALUES (?, ?, ?)");
-                            pps.setInt(1, accountId);
-                            pps.setInt(2, realTradeAmount);
-                            pps.setString(3, DateUtil.getReadableTime());
-                            pps.execute();
-                            pps.close();
-                        } else {
-                            pps = con.prepareStatement("UPDATE donate_point SET `point` = `point` + ? , LastAttempt = ? WHERE accountId = ?");
-                            pps.setInt(1, realTradeAmount);
-                            pps.setString(2, DateUtil.getReadableTime());
-                            pps.setInt(3, accountId);
-                            pps.execute();
-                            pps.close();
-                        }
-                        System.out.println("[贊助入帳] 單號: " + OrderNumber + " 時間: " + DateUtil.getReadableTime() + " 帳號編號: " + accountId + " 贊助: " + realTradeAmount + "元 付款方式: " + PaymentType);
-                        FileUtil.log("日誌/紀錄/贊助紀錄.txt", "時間: " + DateUtil.getReadableTime() + " 帳號編號: " + accountId + " 贊助: " + realTradeAmount + "元,贊助點數已入帳\r\n");
-                    } catch (Throwable var18) {
-                        if (rss != null) {
-                            try {
-                                rss.close();
-                            } catch (Throwable var16) {
-                                var18.addSuppressed(var16);
-                            }
-                        }
-                        throw var18;
-                    }
-                    if (rss != null) {
-                        rss.close();
-                    }
-                }
-            } catch (Throwable var19) {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (Throwable var15) {
-                        var19.addSuppressed(var15);
-                    }
-                }
-
-                throw var19;
-            }
-            if (rs != null) {
-                rs.close();
-            }
-            ppss.close();
-        } catch (Exception ex) {
-            System.out.println("UpdatePaymentDB:" + ex);
-        }
-    }
-
-    public static EcpayFunction.PaymentInfo genAioCheckOutATM(final User usr, final int amount, final String subPayment, final int type) {
-        AioCheckOutATM obj = new AioCheckOutATM();
-        obj.setMerchantTradeNo(usr.getId() + String.valueOf(System.currentTimeMillis()));
+    public static EcpayFunction.PaymentInfo genAioCheckOutCVS(int amount) {
+        AioCheckOutCVS obj = new AioCheckOutCVS();
+        obj.setMerchantTradeNo(Long.toString(System.currentTimeMillis()));
         obj.setMerchantTradeDate(DateUtil.getDatabaseFormatTime());
         obj.setTotalAmount(amount);
-        obj.setTradeDesc("ACCOUNT:" + usr.getEmail());
-        obj.setItemName("GAME DONATE");
+        try{
+            obj.setTradeDesc("安安".getBytes("UTF-8").toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        obj.setItemName("SHOPPING");
+        obj.setReturnURL(ReturnURL);
+        obj.setNeedExtraPaidInfo("N");
+        obj.setChooseSubPayment("CVS");
+        EcpayFunction.PaymentInfo pay = AllInOne.aioCheckOut(obj, (InvoiceObj) null);
+        return pay;
+    }
+
+    public static EcpayFunction.PaymentInfo genAioCheckOutATM(final int amount, final String subPayment) {
+        AioCheckOutATM obj = new AioCheckOutATM();
+        obj.setMerchantTradeNo(Long.toString(System.currentTimeMillis()));
+        obj.setMerchantTradeDate(DateUtil.getDatabaseFormatTime());
+        obj.setTotalAmount(amount);
+        try{
+            obj.setTradeDesc("安安".getBytes("UTF-8").toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        obj.setItemName("SHOPPING");
         obj.setReturnURL(ReturnURL);
         obj.setNeedExtraPaidInfo("N");
         obj.setExpireDate("6");
         obj.setChooseSubPayment(subPayment);
-        obj.setRemark("ACCOUNT : " + usr.getEmail());
-        obj.setCustomField1(String.valueOf(usr.getId()));
-        obj.setCustomField2(String.valueOf(type));
         EcpayFunction.PaymentInfo form = AllInOne.aioCheckOut(obj, (InvoiceObj) null);
-        SavePaymentToDB(usr, form);
         return form;
     }
 
@@ -302,45 +197,6 @@ public class EcpayPayment {
         return payment;
     }
 
-    public static String getAllPayInfoString(List<EcpayFunction.PaymentInfo> pay) {
-        StringBuilder sb = new StringBuilder();
-        if (pay.isEmpty()) {
-            return "您沒有任何開單紀錄哦!";
-        } else {
-            int i = 0;
-            Iterator<EcpayFunction.PaymentInfo> iter = pay.iterator();
-            while (iter.hasNext()) {
-                EcpayFunction.PaymentInfo payinfo = iter.next();
-                ++i;
-                sb.append("#d----------------------第").append(i).append("筆訂單----------------------\r\n");
-                sb.append(String.format("%-10s %-3s", "#b綠界訂單編號 :#r", payinfo.getOrderNumber() + "\r\n"));
-                sb.append(String.format("%-10s %-3s", "#b實際繳費金額 :#r", payinfo.getItemPrice() + "\r\n"));
-                sb.append(String.format("%-10s %-3s", "#b綠界付款方式 :#r", payinfo.getSubPayment() + "\r\n"));
-                sb.append(String.format("%-10s %-3s", "#b繳費截止日期 :#r", payinfo.getPaymentExpiryDate() + "\r\n"));
-                sb.append(String.format("%-10s %-3s", "#b超商繳費代碼 :#r", payinfo.getPaymentNo() + "\r\n"));
-                sb.append(String.format("%-10s %-3s", "#b目前繳費狀態 :#r", payinfo.getPaymentStatus() + "\r\n"));
-            }
-
-            return sb.toString();
-        }
-    }
-
-    public static String getPayInfoString(EcpayFunction.PaymentInfo pay) {
-        StringBuilder sb = new StringBuilder();
-        if (pay == null) {
-            return "沒有此筆訂單哦!請嚴防詐騙以及現金交易!";
-        } else {
-            sb.append("#d--------------------此筆訂單內容---------------------\r\n");
-            sb.append(String.format("%-10s %-3s", "#b綠界訂單編號 :#r", pay.getOrderNumber() + "\r\n"));
-            sb.append(String.format("%-10s %-3s", "#b實際繳費金額 :#r", pay.getItemPrice() + "\r\n"));
-            sb.append(String.format("%-10s %-3s", "#b綠界付款方式 :#r", pay.getSubPayment() + "\r\n"));
-            sb.append(String.format("%-10s %-3s", "#b繳費截止日期 :#r", pay.getPaymentExpiryDate() + "\r\n"));
-            sb.append(String.format("%-10s %-3s", "#b超商繳費代碼 :#r", pay.getPaymentNo() + "\r\n"));
-            sb.append(String.format("%-10s %-3s", "#b目前繳費狀態 :#r", pay.getPaymentStatus() + "\r\n"));
-            return sb.toString();
-        }
-    }
-
     public static EcpayFunction.PaymentInfo genAioCheckOutCVS(final User usr, final int amount) {
         AioCheckOutCVS obj = new AioCheckOutCVS();
         obj.setMerchantTradeNo(usr.getId() + String.valueOf(System.currentTimeMillis()));
@@ -355,7 +211,6 @@ public class EcpayPayment {
         obj.setCustomField1(String.valueOf(usr.getId()));
         //obj.setCustomField2(String.valueOf(type));
         EcpayFunction.PaymentInfo pay = AllInOne.aioCheckOut(obj, (InvoiceObj) null);
-        SavePaymentToDB(usr, pay);
         return pay;
     }
 
@@ -376,7 +231,6 @@ public class EcpayPayment {
 
         EcpayFunction.PaymentInfo payment = new EcpayFunction.PaymentInfo(MerchantTradeNo, "一次性信用卡", "伺服器贊助", amount, "無", "無", "無", "無", "尚未繳款");
         String url = AllInOne.aioCheckOutHtml(obj, (InvoiceObj) null);
-        SavePaymentToDB(usr, payment);
         return url;
     }
 
@@ -404,7 +258,7 @@ public class EcpayPayment {
             }
             ret = compareCheckMacValue(params);
             if (ret && ((String) params.get("RtnCode")).equals("1")) {
-                UpdatePaymentDB((String) params.get("MerchantTradeNo"), (String) params.get("CustomField1"), (String) params.get("TradeAmt"), (String) params.get("PaymentType"), (String) params.get("RtnMsg"));
+                //UpdatePaymentDB((String) params.get("MerchantTradeNo"), (String) params.get("CustomField1"), (String) params.get("TradeAmt"), (String) params.get("PaymentType"), (String) params.get("RtnMsg"));
             } else {
                 System.out.println("驗證失敗! 交易單號:" + params.get("MerchantTradeNo") + " 交易型態:" + (String) params.get("PaymentType") + " RtnMsg:" + (String) params.get("RtnMsg") + " CustomField1(玩家帳號):" + (String) params.get("CustomField1"));
             }

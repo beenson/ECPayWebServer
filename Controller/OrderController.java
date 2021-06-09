@@ -209,10 +209,10 @@ public class OrderController extends Controller{
         payment.setStatus(OrderPayment.PaymentStatus.created);
         EcpayFunction.PaymentInfo info;
         if (type.equals(OrderPayment.PaymentType.ATM)) {
-            info = EcpayPayment.genAioCheckOutTEST(order.getPrice());
-        } else {
-            info = EcpayPayment.genAioCheckOutTEST(order.getPrice());
+            info = EcpayPayment.genAioCheckOutATM(order.getPrice(), bank);
             payment.setBank(info.getBankCode());
+        } else {
+            info = EcpayPayment.genAioCheckOutCVS(order.getPrice());
         }
         payment.setCode(info.getPaymentNo());
         payment.saveToDB();

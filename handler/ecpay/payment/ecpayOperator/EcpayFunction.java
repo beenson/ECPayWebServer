@@ -375,7 +375,7 @@ public class EcpayFunction {
         for (int i = 0; i < elementsByTagName.getLength(); ++i) {
             DomElement domElement = (DomElement) elementsByTagName.get(i);
             String s = "";
-            // System.out.println(i + " : " + domElement.asText().replaceAll("\r|\n", ""));
+            //System.out.println(i + " : " + domElement.asText().replaceAll("\r|\n", ""));
             if (aio instanceof AioCheckOutATM) {
                 s = domElement.asText().replaceAll("\r|\n", "");
                 switch (i) {
@@ -400,8 +400,8 @@ public class EcpayFunction {
                         item_price = Integer.valueOf(s.substring(4).replace(",", ""));
                         break;
                     case 9:// 匯款銀行
-                        bank_code = s.substring(0, 8);
-                        payment_No = s.substring(8, 30);
+                        bank_code = s.substring(5, 8);
+                        payment_No = s.substring(11, 30);
                         break;
                     case 10:// 繳費期限
                         payment_expiredate = s.substring(0, 19);
@@ -491,10 +491,10 @@ public class EcpayFunction {
                 ret = text.replace("付款方式", "").trim();
                 break;
             case 5:
-                ret = text.replace("銀行代碼", "").trim();
+                ret = text.replace("銀行代碼 ", "").trim();
                 break;
             case 6:
-                ret = text.replace("ATM繳費帳號", "").trim();
+                ret = text.replace("帳號 ", "").trim();
                 break;
             case 7:
                 ret = text.replace("繳費截止日期", "").trim();

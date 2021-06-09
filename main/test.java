@@ -26,7 +26,8 @@ public class test {
         Category.loadAllFromDB();
 
         WebServer.start();
-        //testECPay();
+        //testECPayCVS();
+        //testECPayATM();
         //testCreateUser();
         //EcpayServer.startServer();
         //testloadProduct();
@@ -45,9 +46,16 @@ public class test {
         System.out.println(usrtoken.toString());
     }
 
-    public static void testECPay() {
+    public static void testECPayCVS() {
         Thread th = new Thread(() -> {
-            EcpayPayment.genAioCheckOutTEST(1000);
+            EcpayPayment.genAioCheckOutCVS(1000);
+        });
+        th.start();
+    }
+
+    public static void testECPayATM() {
+        Thread th = new Thread(() -> {
+            EcpayPayment.genAioCheckOutATM(1000, "BOT");
         });
         th.start();
     }

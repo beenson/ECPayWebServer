@@ -397,7 +397,10 @@ public class EcpayFunction {
                         item_name = s;
                         break;
                     case 8:// 價格
-                        item_price = Integer.valueOf(s.substring(4).replace(",", ""));
+                        System.out.println(s);
+                        String price = s;
+                        s = s.replace("NT$ ", "");
+                        item_price = Integer.valueOf(s.replace(",", ""));
                         break;
                     case 9:// 匯款銀行
                         bank_code = s.substring(5, 8);

@@ -1,15 +1,14 @@
 package main;
 
 import Config.Config;
+import Util.DateUtil;
 import Util.FileUtil;
 import handler.ecpay.EcpayPayment;
 import handler.jwt.AuthVerify;
 import handler.jwt.JwtHandler;
-import model.Category;
-import model.Order;
-import model.Product;
-import model.User;
+import model.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 
@@ -25,7 +24,9 @@ public class test {
         Product.loadAllFromDB();
         Category.loadAllFromDB();
 
-        WebServer.start();
+        testRecords();
+
+        //WebServer.start();
         //testECPayCVS();
         //testECPayATM();
         //testCreateUser();
@@ -36,6 +37,21 @@ public class test {
         //testCreateOrder();
         //testJWT();
 
+    }
+
+    public static void testRecord() {
+        Date d = DateUtil.getDate("2021/06/10");
+        AnalysisRecord record = AnalysisRecord.getByDateKey(d, AnalysisRecord.KEY_LOGINTIMES);
+        System.out.println(record.toString());
+    }
+
+    public static void testRecords() {
+        Date ds = DateUtil.getDate("2021/05/10");
+        Date de = DateUtil.getDate("2021/06/10");
+        ArrayList<AnalysisRecord> records = AnalysisRecord.getByKey(AnalysisRecord.KEY_LOGINTIMES, ds, de);
+        for(AnalysisRecord record : records) {
+            System.out.println(record.toString());
+        }
     }
 
     public static void testJWT() {

@@ -33,7 +33,7 @@ public class DBCon {
 	public void connect() {
 		try {
 			Class.forName(jdbcName); //載入jdbc驅動程式
-			con = DriverManager.getConnection("jdbc:mysql://"+ DBConfig.getHost() +":"+DBConfig.getPort()+"/"+DBConfig.getDbName()+"?" + "user="+DBConfig.getUsername()+"&password="+DBConfig.getPassword()); //驅動程式管理器，取得mysql連線
+			con = DriverManager.getConnection("jdbc:mysql://"+ DBConfig.getHost() +":"+DBConfig.getPort()+"/"+DBConfig.getDbName()+"?characterEncoding=UTF-8&" + "user="+DBConfig.getUsername()+"&password="+DBConfig.getPassword()); //驅動程式管理器，取得mysql連線
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

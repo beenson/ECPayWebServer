@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -36,9 +37,56 @@ public class AnalysisRecord {
         this.key = key;
         this.value = value;
     }
+    public AnalysisRecord(Date date, String key) {
+        this.id = -1;
+        this.date = date;
+        this.key = key;
+    }
 
     public String toString() {
         return "id::" + id + " Date=" + DateUtil.getReadableTime(date) + " key=" + key + " value=" + value;
+    }
+
+    public void saveToDB() {
+        try (Connection con = DBCon.getConnection()) {
+            if (this.id == -1) {
+                try {
+                    PreparedStatement ps;
+                    ps = con.prepareStatement("INSERT INTO analysisrecord (`key`, date, value) VALUES (?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps.setString(1, key);
+                    ps.setDate(2, new java.sql.Date(date.getTime()));
+                    ps.setInt(3, value);
+                    ps.execute();
+
+                    // 取得自動遞增的id
+                    try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            setId(generatedKeys.getInt(1));
+                        } else {
+                            throw new SQLException("Creating AnalysisRecord failed, no ID obtained.");
+                        }
+                    }
+                    ps.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                try {
+                    PreparedStatement ps;
+                    ps = con.prepareStatement("UPDATE analysisrecord SET `key` = ?, date = ?, value = ? WHERE id = ?");
+                    ps.setString(1, key);
+                    ps.setDate(2, new java.sql.Date(date.getTime()));
+                    ps.setInt(3, value);
+                    ps.setInt(4, id);
+                    ps.execute();
+                    ps.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public static AnalysisRecord getByDateKey(Date date, String key) {

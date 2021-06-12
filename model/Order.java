@@ -23,11 +23,11 @@ public class Order {
     @Getter @Setter
     private int id, userId, price;
     @Getter @Setter
-    private Date createAt;
+    private long createAt;
     @Getter @Setter
     private OrderStatus status;
 
-    public Order(int id, int userId, int price, int status, Date createAt) {
+    public Order(int id, int userId, int price, int status, long createAt) {
         this.id = id;
         this.userId = userId;
         this.price = price;
@@ -40,7 +40,7 @@ public class Order {
         this.userId = userId;
         this.status = OrderStatus.createOrder;
         this.price = 0;
-        this.createAt = DateUtil.getDateWithAddTime(0);
+        this.createAt = DateUtil.getTimeStamp();
     }
 
     public String toString() {
@@ -101,7 +101,7 @@ public class Order {
                     ps.setInt(1, userId);
                     ps.setInt(2, price);
                     ps.setInt(3, status.value);
-                    ps.setDate(4, new java.sql.Date(createAt.getTime()));
+                    ps.setTimestamp(4, new java.sql.Timestamp(createAt));
                     ps.execute();
 
                     // 取得自動遞增的id
@@ -124,7 +124,7 @@ public class Order {
                     ps.setInt(1, userId);
                     ps.setInt(2, price);
                     ps.setInt(3, status.value);
-                    ps.setDate(4, new java.sql.Date(createAt.getTime()));
+                    ps.setLong(4, createAt);
                     ps.setInt(5, id);
                     ps.execute();
                     ps.close();
@@ -148,7 +148,7 @@ public class Order {
                     int userId = rs.getInt("userId");
                     int price = rs.getInt("price");
                     int status = rs.getInt("status");
-                    Date date = rs.getDate("createAt");
+                    long date = rs.getTimestamp("createAt").getTime();
                     Order order = new Order(id, userId, price, status, date);
                     orders.put(id, order);
                 }
@@ -180,7 +180,7 @@ public class Order {
                     int userId = rs.getInt("userId");
                     int price = rs.getInt("price");
                     int status = rs.getInt("status");
-                    Date date = rs.getDate("createAt");
+                    long date = rs.getTimestamp("createAt").getTime();
                     Order order = new Order(id, userId, price, status, date);
                     list.put(id, order);
                 }
@@ -211,7 +211,7 @@ public class Order {
                     int userId = rs.getInt("userId");
                     int price = rs.getInt("price");
                     int status = rs.getInt("status");
-                    Date date = rs.getDate("createAt");
+                    long date = rs.getTimestamp("createAt").getTime();
                     Order order = new Order(id, userId, price, status, date);
                     return order;
                 }

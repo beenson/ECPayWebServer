@@ -108,7 +108,7 @@ public class test {
     }
 
     public static void testCreateOrder() {
-        Order order = new Order(-1, 1, 1000, 0, new Date());
+        Order order = new Order(-1, 1, 1000, 0, DateUtil.getTimeStamp());
         order.saveToDB();
         System.out.println(order.toString());
     }

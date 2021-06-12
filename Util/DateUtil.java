@@ -48,6 +48,7 @@ public class DateUtil {
         date.setSeconds(0);
         date.setMinutes(0);
     }
+
     public static Date getDateWithAddTime(long time) {
         Date date = new Date(getTimeStamp() + time);
         return date;

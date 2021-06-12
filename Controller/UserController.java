@@ -3,6 +3,7 @@ package Controller;
 import Util.JsonUtil;
 import com.sun.net.httpserver.Headers;
 import handler.jwt.AuthVerify;
+import model.AnalysisRecord;
 import model.User;
 import com.alibaba.fastjson.*;
 
@@ -73,6 +74,7 @@ public class UserController extends Controller {
         if (!usr.getPassword().equals(password)) {
             return JsonUtil.errPassword();
         }
+        AnalysisRecord.recordLogin();
         String token = AuthVerify.generateToken(usr);
         JSONObject json = new JSONObject ();
         json.put("token", token);
@@ -94,6 +96,7 @@ public class UserController extends Controller {
         }
         usr = new User(-1, 0, name, email, password, phone);
         usr.saveToDB();
+        AnalysisRecord.recordRegister();
         String token = AuthVerify.generateToken(usr);
         JSONObject json = new JSONObject ();
         json.put("token", token);

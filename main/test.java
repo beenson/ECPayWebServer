@@ -24,9 +24,9 @@ public class test {
         Product.loadAllFromDB();
         Category.loadAllFromDB();
 
-        testRecords();
+        //testRecords();
 
-        //WebServer.start();
+        WebServer.start();
         //testECPayCVS();
         //testECPayATM();
         //testCreateUser();

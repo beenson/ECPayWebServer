@@ -39,6 +39,10 @@ public class DateUtil {
         return date;
     }
 
+    public static Date getDefaultDay() {
+        return getDate("1970/01/01");
+    }
+
     public static void standardDate(Date date) {
         date.setHours(0);
         date.setSeconds(0);

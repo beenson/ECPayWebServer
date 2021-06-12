@@ -16,7 +16,11 @@ import java.util.Date;
 public class AnalysisRecord {
 
     public static final String  KEY_LOGINTIMES = "LOGINTIMES"; // 登入次數
+    public static final String  KEY_REGISTERTIMES = "REGISTERTIMES"; // 註冊次數
     public static final String  KEY_EARNINGS = "EARNINGS"; // 營收額
+    public static final String  KEY_EARNING_TYPE = "EARNING_"; // 營收額(分類)
+    public static final String  KEY_SELL_TYPE = "SELL_"; // 銷量(分類)
+    public static final String  KEY_PAYMENT_TYPE = "PAYMENT_"; // 銷量(分類) 不分日期
 
     @Getter @Setter
     private int id = 0, value = 0;
@@ -89,6 +93,73 @@ public class AnalysisRecord {
         }
     }
 
+    public void addValue() {
+        this.addValue(1);
+    }
+    public void addValue(int value) {
+        this.value += value;
+        this.saveToDB();
+    }
+
+    // 紀錄登入
+    public static void recordRegister() {
+        AnalysisRecord record = getByTodayKey(KEY_REGISTERTIMES);
+        if (record == null) {
+            record = new AnalysisRecord(DateUtil.getToday(), KEY_REGISTERTIMES);
+        }
+        record.addValue();
+    }
+
+    // 紀錄登入
+    public static void recordLogin() {
+        AnalysisRecord record = getByTodayKey(KEY_LOGINTIMES);
+        if (record == null) {
+            record = new AnalysisRecord(DateUtil.getToday(), KEY_LOGINTIMES);
+        }
+        record.addValue();
+    }
+
+    // 紀錄訂單
+    public static void recordOrderData(Order order) {
+        AnalysisRecord earn, earn_type, payment, sell;
+        payment = getPaymentType(order.getPayment().getType().name(), order.getPayment().getBank());
+        payment.addValue();
+        earn = getByTodayKey(KEY_EARNINGS);
+        if (earn == null) {
+            earn = new AnalysisRecord(DateUtil.getToday(), KEY_EARNINGS);
+        }
+        earn.addValue(order.getPrice());
+        for(OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            int category = product.getCategoryId();
+            sell = getByTodayKey(KEY_SELL_TYPE + category);
+            earn_type = getByTodayKey(KEY_EARNING_TYPE + category);
+            if (sell == null) {
+                sell = new AnalysisRecord(DateUtil.getToday(), KEY_SELL_TYPE + category);
+            }
+            if (earn_type == null) {
+                sell = new AnalysisRecord(DateUtil.getToday(), KEY_EARNING_TYPE + category);
+            }
+            sell.addValue(item.getAmount());
+            earn_type.addValue(item.getAmount() * product.getPrice());
+        }
+    }
+
+    public static AnalysisRecord getPaymentType(String type, String bank) {
+        //CVS 或 ATM_[銀行]
+        if (type.equals("ATM")) {
+            type = type + "_" + bank;
+        }
+        AnalysisRecord record = getByDateKey(DateUtil.getDefaultDay(), KEY_PAYMENT_TYPE + type);
+        if (record == null) {
+            record = new AnalysisRecord(DateUtil.getDefaultDay(), KEY_PAYMENT_TYPE + type);
+        }
+        return record;
+    }
+
+    public static AnalysisRecord getByTodayKey(String key) {
+        return getByDateKey(DateUtil.getToday(), key);
+    }
     public static AnalysisRecord getByDateKey(Date date, String key) {
         DateUtil.standardDate(date);
         AnalysisRecord record = null;

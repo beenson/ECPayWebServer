@@ -148,6 +148,14 @@ public class OrderController extends Controller{
         ArrayList<OrderItem> items = addOrderItems(order.getId(), data);
         order.calculatePrice();
         OrderPayment payment = this.generatePayment(order, type, bank);
+        Thread th = new Thread(() -> {
+            try{
+                AnalysisRecord.recordOrderData(order);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        th.start();
         JSONObject json = new JSONObject();
         json.put("Order", order);
         json.put("OrderItems", items);

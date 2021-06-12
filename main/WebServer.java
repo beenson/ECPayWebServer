@@ -1,10 +1,7 @@
 package main;
 
 import Config.WebConfig;
-import Controller.CategoryController;
-import Controller.OrderController;
-import Controller.ProductController;
-import Controller.UserController;
+import Controller.*;
 import com.sun.net.httpserver.HttpServer;
 
 import java.net.InetSocketAddress;
@@ -22,6 +19,7 @@ public class WebServer {
             server.createContext("/product", new ProductController());
             server.createContext("/category", new CategoryController());
             server.createContext("/order", new OrderController());
+            server.createContext("/admin", new AdminController());
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();
             enable = true;

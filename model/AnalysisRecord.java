@@ -190,6 +190,40 @@ public class AnalysisRecord {
         return record;
     }
 
+    public static ArrayList<AnalysisRecord> getListByTodayKey(String key) {
+        return getListByDateKey(DateUtil.getToday(), key);
+    }
+    public static ArrayList<AnalysisRecord> getListByDateKey(Date date, String key) {
+        DateUtil.standardDate(date);
+        ArrayList<AnalysisRecord> records = new ArrayList<>();
+        try (Connection con = DBCon.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM analysisrecord WHERE `key` LIKE ? AND date = ?");
+            ps.setString(1, "%" + key + "%");
+            ps.setDate(2, new java.sql.Date(date.getTime()));
+            ResultSet rs = ps.executeQuery();
+            try {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String _key = rs.getString("key");
+                    Date d = rs.getDate("date");
+                    int value = rs.getInt("value");
+                    records.add(new AnalysisRecord(id, date, _key, value));
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return records;
+    }
     public static ArrayList<AnalysisRecord> getByKey(String key, Date startDate, Date endDate) {
         DateUtil.standardDate(startDate);
         DateUtil.standardDate(endDate);

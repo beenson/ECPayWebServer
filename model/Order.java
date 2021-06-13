@@ -124,7 +124,7 @@ public class Order {
                     ps.setInt(1, userId);
                     ps.setInt(2, price);
                     ps.setInt(3, status.value);
-                    ps.setLong(4, createAt);
+                    ps.setTimestamp(4, new java.sql.Timestamp(createAt));
                     ps.setInt(5, id);
                     ps.execute();
                     ps.close();

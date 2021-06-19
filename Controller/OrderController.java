@@ -83,6 +83,7 @@ public class OrderController extends Controller{
         }
         json.put("Order", order);
         json.put("OrderItems", order.getOrderItems());
+        json.put("Payment", order.getPayment());
         return json;
     }
 

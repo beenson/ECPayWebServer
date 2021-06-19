@@ -194,12 +194,16 @@ public class OrderController extends Controller{
             }
             int pid = Integer.parseInt(json.get("productId").toString());
             int amount = Integer.parseInt(json.get("amount").toString());
-            if (Product.getById(pid) == null) {
+            Product product = Product.getById(pid);
+            if (product == null) {
                 return;
             }
             if (amount <= 0) {
                 return;
             }
+            product.setSellAmount(product.getSellAmount() + amount);
+            product.setStorageAmount(product.getStorageAmount() - amount);
+            product.saveToDB();
             OrderItem item = new OrderItem(oId, pid, amount);
             item.saveToDB();
             items.add(item);

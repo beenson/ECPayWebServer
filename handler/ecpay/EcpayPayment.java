@@ -129,6 +129,7 @@ public class EcpayPayment {
         }
         obj.setItemName("SHOPPING");
         obj.setReturnURL(ReturnURL);
+        //obj.setPaymentInfoURL(ReturnURL);
         obj.setNeedExtraPaidInfo("N");
         obj.setChooseSubPayment("CVS");
         EcpayFunction.PaymentInfo pay = AllInOne.aioCheckOut(obj, (InvoiceObj) null);
@@ -147,6 +148,8 @@ public class EcpayPayment {
         }
         obj.setItemName("SHOPPING");
         obj.setReturnURL(ReturnURL);
+        System.out.println("ReturnURL=" + ReturnURL);
+        //obj.setPaymentInfoURL(ReturnURL);
         obj.setNeedExtraPaidInfo("N");
         obj.setExpireDate("6");
         obj.setChooseSubPayment(subPayment);
@@ -205,6 +208,7 @@ public class EcpayPayment {
         obj.setTradeDesc("ACCOUNT:" + usr.getEmail());
         obj.setItemName("GAME DONATE");
         obj.setReturnURL(ReturnURL);
+        obj.setPaymentInfoURL(ReturnURL);
         obj.setNeedExtraPaidInfo("N");
         obj.setChooseSubPayment("CVS");
         obj.setRemark("ACCOUNT:" + usr.getEmail());
@@ -258,9 +262,10 @@ public class EcpayPayment {
             }
             ret = compareCheckMacValue(params);
             if (ret && ((String) params.get("RtnCode")).equals("1")) {
+                System.out.println("驗證成功! 交易單號:" + params.get("MerchantTradeNo") + " 交易型態:" + (String) params.get("PaymentType") + " RtnMsg:" + (String) params.get("RtnMsg") + " CustomField1(玩家帳號):" + (String) params.get("CustomField1"));
                 //UpdatePaymentDB((String) params.get("MerchantTradeNo"), (String) params.get("CustomField1"), (String) params.get("TradeAmt"), (String) params.get("PaymentType"), (String) params.get("RtnMsg"));
             } else {
-                System.out.println("驗證失敗! 交易單號:" + params.get("MerchantTradeNo") + " 交易型態:" + (String) params.get("PaymentType") + " RtnMsg:" + (String) params.get("RtnMsg") + " CustomField1(玩家帳號):" + (String) params.get("CustomField1"));
+                System.out.println("驗證失敗! 交易單號:" + params.get("MerchantTradeNo") + " 交易型態:" + (String) params.get("PaymentType") + " RtnMsg:" + (String) params.get("RtnMsg") + " CustomField1:" + (String) params.get("CustomField1"));
             }
         } catch (Exception ex) {
             FileUtil.log("EcpayPayment.txt", "CheckMacValue驗證結果異常 checkMacValue\n" + ex.getMessage() + "params: " + params);

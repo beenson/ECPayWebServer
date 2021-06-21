@@ -72,7 +72,7 @@ public class EcpayServer {
                         for (s = ""; (length = in.read(b)) > 0; s = data.trim()) {
                             data = data + new String(b, 0, length, "UTF-8");
                         }
-//                        System.out.println("接收到連線, data[" + data + "] s: [" + s + "]");
+                        System.out.println("接收到連線, data[" + data + "] s: [" + s + "]");
 
                         if (s.contains("CheckMacValue")) {
                             EcpayPayment.checkMacValue(s);

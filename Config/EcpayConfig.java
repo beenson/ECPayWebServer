@@ -20,7 +20,7 @@ public class EcpayConfig {
     public static String ECPayIp = "127.0.0.1";
     @Getter
     @Setter
-    public static int ECPayPort = 8080;
+    public static int ECPayPort = 8081;
 
     public static void loadSetting() {
         PropertiesUtil.loadProperties("setting/ecpay.ini");

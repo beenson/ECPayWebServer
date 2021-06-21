@@ -30,7 +30,7 @@ public class test {
         //testECPayCVS();
         //testECPayATM();
         //testCreateUser();
-        //EcpayServer.startServer();
+        EcpayServer.startServer();
         //testloadProduct();
         //testCreateProduct();
         //testloadOrder();

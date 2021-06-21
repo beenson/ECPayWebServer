@@ -1,0 +1,2 @@
+CheckMacValue驗證結果異常 checkMacValue
+String index out of range: -1params: {}

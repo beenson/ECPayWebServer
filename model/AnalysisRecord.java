@@ -132,6 +132,7 @@ public class AnalysisRecord {
         for(OrderItem item : order.getOrderItems()) {
             Product product = item.getProduct();
             int category = product.getCategoryId();
+            int price = 0;
             sell = getByTodayKey(KEY_SELL_TYPE + category);
             earn_type = getByTodayKey(KEY_EARNING_TYPE + category);
             if (sell == null) {
@@ -139,6 +140,9 @@ public class AnalysisRecord {
             }
             if (earn_type == null) {
                 sell = new AnalysisRecord(DateUtil.getToday(), KEY_EARNING_TYPE + category);
+            }
+            if (product != null) {
+                price = product.getPrice();
             }
             sell.addValue(item.getAmount());
             earn_type.addValue(item.getAmount() * product.getPrice());
